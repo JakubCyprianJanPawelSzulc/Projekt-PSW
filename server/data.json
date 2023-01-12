@@ -1,0 +1,22 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "username": "kuba",
+      "password": "haslo1",
+      "email": "kuba@example.com",
+      "games_played": 20,
+      "wins": 10,
+      "losses": 2
+    },
+    {
+      "id": "2",
+      "username": "olimpia",
+      "password": "haslo2",
+      "email": "olimpia@example.com",
+      "games_played": 20,
+      "wins": 7,
+      "losses": 5
+    }
+  ]
+}
