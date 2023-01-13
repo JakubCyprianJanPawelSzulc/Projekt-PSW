@@ -129,3 +129,8 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Serwer uruchomiony na porcie ${port}`)
 });
+
+// const { Card, Deck } = require('./war.js');
+// const mqtt = require('mqtt');
+// const client = mqtt.connect('mqtt://localhost:1883');
+// const card = new Card('A', 'hearts', client);

@@ -1,10 +1,13 @@
 import { useFormik } from 'formik';
 import React, {useState} from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useCookies} from 'react-cookie';
+
 
 // import fetch from 'node-fetch';
 
 export default function LoginForm() {
+  const [cookies, setCookie] = useCookies(['id']);
   const navigate = useNavigate()
   const formik = useFormik({
     initialValues: {
@@ -18,7 +21,12 @@ export default function LoginForm() {
         headers: { 'Content-Type': 'application/json' },
       })
       .then((res) =>{
-        if(res.status === 200){
+        if(res.status === 200){ 
+            console.log(res.headers.get('Set-Cookie'))
+            const cookies = res.headers.get('set-cookie');
+            const id = cookies.split(';').find(cookie => cookie.startsWith('id'));
+            setCookie('id', id, {path:'/'});
+            // setCookie('id', cookies.id, { path: '/' });
             alert('Zalogowano')
             navigate('/MainPage')
             return res.json()
