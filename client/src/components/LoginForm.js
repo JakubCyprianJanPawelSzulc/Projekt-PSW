@@ -22,10 +22,10 @@ export default function LoginForm() {
       })
       .then((res) =>{
         if(res.status === 200){ 
-            console.log(res.headers.get('Set-Cookie'))
-            const cookies = res.headers.get('set-cookie');
-            const id = cookies.split(';').find(cookie => cookie.startsWith('id'));
-            setCookie('id', id, {path:'/'});
+            // console.log(res.headers.get('Set-Cookie'))
+            // const cookies = res.headers.get('set-cookie');
+            // const id = cookies.split(';').find(cookie => cookie.startsWith('id'));
+            setCookie('id', res.id, {path:'/'});
             // setCookie('id', cookies.id, { path: '/' });
             alert('Zalogowano')
             navigate('/MainPage')

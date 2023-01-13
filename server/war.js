@@ -40,40 +40,44 @@ class Deck {
   addCard(card) {
       this.cards.push(card);
   }
-  // subscribeToWar() {
-  //     // kod subskrybujący temat "war" za pomocą MQTT
-  //     //funkcja subscribeToWar powinna być wywoływana tylko raz na początku gry, żeby zapobiec powstaniu wielu subskrypcji tego samego tematu.
-  //     this.mqttClient.subscribe('/game/war', (err, granted) => {
-  //       if (!err) {
-  //         this.mqttClient.on('message', (topic, message) => {
-  //           if (topic === '/game/war') {
-  //             this.startWar(JSON.parse(message.toString()));
-  //           }
-  //         });
-  //       }
-  //     });
-  // }
 }
 class GameManager {
   constructor(player1Deck, player2Deck, mqttClient) {
     this.player1Deck = player1Deck;
     this.player2Deck = player2Deck;
     this.mqttClient = mqttClient;
-    this.war = new War(player1Deck, player2Deck, mqttClient);
+    this.player1MovePromise = new Promise((resolve) => {
+      this.mqttClient.subscribe('/game/player1Move', (err, granted) => {
+        if (!err) {
+          this.mqttClient.on('message', (topic, message) => {
+            if (topic === '/game/player1Move') {
+              resolve();
+            }
+          });
+        }
+      });
+    });
+    this.player2MovePromise = new Promise((resolve) => {
+      this.mqttClient.subscribe('/game/player2Move', (err, granted) => {
+        if (!err) {
+          this.mqttClient.on('message', (topic, message) => {
+            if (topic === '/game/player2Move') {
+              resolve();
+            }
+          });
+        }
+      });
+    });
   }
 
-  startGame() {
-    this.mqttClient.publish('/game/start', 'Gra rozpoczęta');
-    this.playRound();
-  }
-
-  playRound() {
-    const card1 = this.player1Deck.drawCard();
-    const card2 = this.player2Deck.drawCard();
-    if (card1.value === card2.value) {
+  async playRound() {
+    await Promise.all([this.player1MovePromise, this.player2MovePromise]);
+    const player1Card = this.player1Deck.drawCard();
+    const player2Card = this.player2Deck.drawCard();
+    if (player1Card.value === player2Card.value) {
       this.war.start();
     } else {
-      this.determineRoundWinner(card1, card2);
+      this.determineRoundWinner(player1Card, player2Card);
     }
   }
 
@@ -101,18 +105,154 @@ class War {
     this.mqttClient = mqttClient;
     this.player1Card;
     this.player2Card;
+    this.player1WarCards = [];
+    this.player2WarCards = [];
+    this.player1Move1Promise = new Promise((resolve) => {
+      this.mqttClient.subscribe('/game/player1Move1', (err, granted) => {
+        if (!err) {
+          this.mqttClient.on('message', (topic, message) => {
+            if (topic === '/game/player1Move1') {
+              resolve();
+            }
+          });
+        }
+      });
+    });
+    this.player2MovePromise = new Promise((resolve) => {
+      this.mqttClient.subscribe('/game/player2Move1', (err, granted) => {
+        if (!err) {
+          this.mqttClient.on('message', (topic, message) => {
+            if (topic === '/game/player2Move1') {
+              resolve();
+            }
+          });
+        }
+      });
+    });
+    this.player1Move2Promise = new Promise((resolve) => {
+      this.mqttClient.subscribe('/game/player1Move2', (err, granted) => {
+        if (!err) {
+          this.mqttClient.on('message', (topic, message) => {
+            if (topic === '/game/player1Move2') {
+              resolve();
+            }
+          });
+        }
+      });
+    });
+    this.player2Move2Promise = new Promise((resolve) => {
+      this.mqttClient.subscribe('/game/player2Move2', (err, granted) => {
+        if (!err) {
+          this.mqttClient.on('message', (topic, message) => {
+            if (topic === '/game/player2Move2') {
+              resolve();
+            }
+          });
+        }
+      });
+    });
   }
   
-  start() {
-    this.player1Card = this.player1Deck.drawCard();
-    this.player2Card = this.player2Deck.drawCard();
-    this.mqttClient.publish('/game/war', JSON.stringify({player1Card:this.player1Card, player2Card:this.player2Card}));
-    if(this.player1Card.value === this.player2Card.value) {
-      // continue war
-    } else if (this.player1Card.value > this.player2Card.value) {
-      // player1 wins
+  async start() {
+    await Promise.all([this.player1Move1Promise, this.player2Move1Promise, this.player1Move2Promise, this.player2Move2Promise]);
+    const player1Card1 = this.player1Deck.drawCard();
+    const player2Card1 = this.player2Deck.drawCard();
+    const player1Card2 = this.player1Deck.drawCard();
+    const player2Card2 = this.player2Deck.drawCard();
+    this.player1WarCards.push(player1Card1);
+    this.player1WarCards.push(player1Card2);
+    this.player2WarCards.push(player2Card1);
+    this.player2WarCards.push(player2Card2);
+    this.mqttClient.publish('/game/war', JSON.stringify({player1Card1:this.player1Card1, player2Card1:this.player2Card1,player1Card2:this.player1Card2, player2Card2:this.player2Card2}));
+    if(this.player1Card2.value === this.player2Card2.value) {
+      this.continueWar();
+    } else if (this.player1Card2.value > this.player2Card2.value) {
+      this.endWar("gracz 1 wygrywa");
     } else {
-      // player2 wins
+      this.endWar("gracz 2 wygrywa");
+    }
+  }
+  
+  async continueWar() {
+    const player1Move3Promise = new Promise((resolve) => {
+      this.mqttClient.subscribe('/game/player1Move1', (err, granted) => {
+        if (!err) {
+          this.mqttClient.on('message', (topic, message) => {
+            if (topic === '/game/player1Move1') {
+              resolve();
+            }
+          });
+        }
+      });
+    });
+    const player2Move3Promise = new Promise((resolve) => {
+      this.mqttClient.subscribe('/game/player2Move1', (err, granted) => {
+        if (!err) {
+          this.mqttClient.on('message', (topic, message) => {
+            if (topic === '/game/player2Move1') {
+              resolve();
+            }
+          });
+        }
+      });
+    });
+    const player1Move4Promise = new Promise((resolve) => {
+      this.mqttClient.subscribe('/game/player1Move2', (err, granted) => {
+        if (!err) {
+          this.mqttClient.on('message', (topic, message) => {
+            if (topic === '/game/player1Move2') {
+              resolve();
+            }
+          });
+        }
+      });
+    });
+    const player2Move4Promise = new Promise((resolve) => {
+      this.mqttClient.subscribe('/game/player2Move2', (err, granted) => {
+        if (!err) {
+          this.mqttClient.on('message', (topic, message) => {
+            if (topic === '/game/player2Move2') {
+              resolve();
+            }
+          });
+        }
+      });
+    });
+    await Promise.all([player1Move3Promise, player2Move3Promise, player1Move4Promise, player2Move4Promise]);
+    
+    const player1Card3 = this.player1Deck.drawCard();
+    const player2Card3 = this.player2Deck.drawCard();
+    const player1Card4 = this.player1Deck.drawCard();
+    const player2Card4 = this.player2Deck.drawCard();
+
+    this.player1WarCards.push(player1Card3);
+    this.player2WarCards.push(player2Card3);
+    this.player1WarCards.push(player1Card4);
+    this.player2WarCards.push(player2Card4);
+    this.mqttClient.publish('/game/war', JSON.stringify({player1WarCard:player1Card4, player2WarCard:player2Card4}));
+    if(this.player1Card4.value === this.player2Card4.value) {
+      this.continueWar();
+    } else if (this.player1Card2.value > this.player2Card2.value) {
+      this.endWar("gracz 1 wygrywa");
+    } else {
+      this.endWar("gracz 2 wygrywa");
+    }
+  }
+
+
+  endWar(winner) {
+    if(winner === "Player 1 wins") {
+      this.player1Deck.addCard(...this.player1WarCards);
+      this.player1Deck.addCard(...this.player2WarCards);
+      this.mqttClient.publish('/game/war/result', 'Gracz 1 wygrał wojnę');
+    } else {
+      this.player2Deck.addCard(...this.player1WarCards);
+      this.player2Deck.addCard(...this.player2WarCards);
+      this.mqttClient.publish('/game/war/result', 'Gracz 2 wygrał wojnę');
     }
   }
 }
+  
+  
+  
+  
