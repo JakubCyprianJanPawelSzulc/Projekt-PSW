@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { useCookies } from 'react-cookie';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import DeleteUserData from './DeleteUserData.js';
 import EditUserData from './EditUserData.js';
 
 export default function UserData() {
-    const [cookies] = useCookies(['id']);
+    const id = useSelector(state => state.login.userId);
     const [user, setUser] = useState({});
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        if(cookies.id){
+        if(id){
             const fetchData = async () => {
                 try {
-                    const result = await axios.get(`http://localhost:3000/api/users/${cookies.id}`);
+                    const result = await axios.get(`http://localhost:3000/api/users/${id}`);
                     setUser(result.data);
                 } catch (error) {
                     setError(error);
@@ -22,7 +22,7 @@ export default function UserData() {
             };
             fetchData();
         }
-    }, [cookies.id]);
+    }, [id]);
 
 
     if (error) {

@@ -1,3 +1,7 @@
+const mqtt = require('mqtt');
+const client = mqtt.connect('ws://test.mosquitto.org/');
+const { Card, Deck, GameManager } = require('./war.js');
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
@@ -15,6 +19,19 @@ app.use(cookieParser());
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+let readyPlayerCount = 0;
+
+app.post('/ready', (req, res) => {
+  readyPlayerCount++;
+  if (readyPlayerCount === 2) {
+    const gameManager = new GameManager(client);
+    gameManager.startGame();
+    readyPlayerCount = 0;
+    res.send('siema eniu!');
+  }
+  res.send('Gotowe do gry!');
+});
 
 app.post('/register', (req, res) => {
   const { id, username, email, password } = req.body;
@@ -48,8 +65,11 @@ app.post('/login', (req, res) => {
     let users = JSON.parse(data);
     let existingUser = users.users.find((u) => u.username === username && u.password === password);
     if (existingUser) {
-      res.cookie('id', existingUser.id, { expires: new Date(Date.now() + 900000), httpOnly: false, secure: false});
-      res.json('Uwierzytelnienie udane, witaj ' + existingUser.username);
+      // res.cookie('id', existingUser.id, { expires: new Date(Date.now() + 900000), httpOnly: false, secure: false});
+      res.json({
+        message: 'Uwierzytelnienie udane, witaj ' + existingUser.username,
+        id: existingUser.id
+      });
     } else {
       res.status(401).json({error: 'Nieprawidłowy login lub hasło'});
     }
@@ -123,6 +143,17 @@ app.put('/api/users/:id', (req, res) => {
       res.status(404).json({error: 'Nie znaleziono użytkownika o podanym identyfikatorze'});
     }
   });
+});
+
+app.post('/ready', (req, res) => {
+  // kod do obsługi żądania od gracza, że jest gotów do gry
+  // np. zwiększanie licznika graczy gotowych do gry
+  // lub dodawanie gracza do tablicy gotowych graczy
+  if (gotowiGracze.length === 2) {
+    // uruchom GameManager i rozpocznij grę
+    const gameManager = new GameManager(client);
+    gameManager.startGame();
+  }
 });
 
 const port = process.env.PORT || 3000;

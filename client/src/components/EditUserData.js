@@ -1,60 +1,79 @@
 import React, { useState, useEffect } from 'react';
-import { useCookies } from 'react-cookie';
+import { useSelector } from 'react-redux';
+import { useFormik } from 'formik';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
-import formik from 'formik';
 
 export default function EditUserData() {
+  const id = useSelector(state => state.login.userId);
+  const [userData, setUserData] = useState({});
+  const [error, setError] = useState(null);
 
-    const [cookies] = useCookies(['id']);
-    const [user, setUser] = useState({});
-    const [error, setError] = useState(null);
-
-
-    useEffect(() => {
-        if(cookies.id){
-            const fetchData = async () => {
-                try {
-                    const result = await axios.get(`http://localhost:3000/api/users/${cookies.id}`);
-                    setUser(result.data);
-                } catch (error) {
-                    setError(error);
-                }
-            };
-            fetchData();
-        }
-    }
-    , [cookies.id]);
-
-
-    const handleEdit = async () => {
+  useEffect(() => {
+    if (id) {
+      const fetchData = async () => {
         try {
-            const result = await axios.put(`http://localhost:3000/api/users/${cookies.id}`);
-            console
+          const result = await axios.get(`http://localhost:3000/api/users/${id}`);
+          setUserData(result.data);
         } catch (error) {
-            setError(error);
+          setError(error);
         }
-    };
+      };
+      fetchData();
+    }
+  }, [id]);
 
-    return(
-        <div className="edit-user-data">
+  const formik = useFormik({
+    initialValues: {
+      username: userData.username || '',
+      email: userData.email || '',
+      password: '',
+    },
+    onSubmit: async (values) => {
+      try {
+        await axios.put(`http://localhost:3000/api/users/${id}`, values);
+        console.log('Dane zostały zmienione');
+      } catch (error) {
+        setError(error);
+      }
+    },
+  });
 
-            <form onSubmit={handleEdit}>
-                <label>
-                    <input type="text" name="username" placeholder="username" />
-                </label>
-                <label>
-                    <input type="text" name="email" placeholder="email" />
-                </label>
-                <label>
-                    <input type="text" name="password" placeholder="password" />
-                </label>
-                <label>
-                    <input type="text" name="password2" placeholder="password2" />
-                </label>
-                
-                <button type="submit">zmień dane</button>
-            </form>
-        </div>   
-    )
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
+  return (
+    <div className="edit-user-data">
+      <form onSubmit={formik.handleSubmit}>
+        <label>
+          <input
+            type="text"
+            name="username"
+            placeholder="username"
+            value={formik.values.username}
+            onChange={formik.handleChange}
+          />
+        </label>
+        <label>
+          <input
+            type="text"
+            name="email"
+            placeholder="email"
+            value={formik.values.email}
+            onChange={formik.handleChange}
+          />
+        </label>
+        <label>
+          <input
+            type="password"
+            name="password"
+            placeholder="password"
+            onChange={formik.handleChange}
+          />
+        </label>
+
+        <button type="submit">Zmień dane</button>
+      </form>
+    </div>
+  );
 }

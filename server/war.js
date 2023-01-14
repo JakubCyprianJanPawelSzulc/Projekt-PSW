@@ -31,22 +31,60 @@ class Deck {
   }
   drawCard() {
     if(this.cards.length === 0) {
-        this.shuffle();
+      const drawnCard = null;
+      this.mqttClient.publish('/game/noCards', JSON.stringify({ playerId: this.playerId }));
+      return drawnCard;
     }
-    const drawnCard = this.cards.shift();
-    this.mqttClient.publish('/game/cardDrawn', JSON.stringify({ value: drawnCard.value, suit: drawnCard.suit }));
-    return drawnCard;
+    else{
+      this.shuffle();
+      const drawnCard = this.cards.shift();
+      this.mqttClient.publish('/game/cardDrawn', JSON.stringify({ value: drawnCard.value, suit: drawnCard.suit }));
+      return drawnCard;
+    }
 }
   addCard(card) {
       this.cards.push(card);
   }
 }
+
 class GameManager {
-  constructor(player1Deck, player2Deck, mqttClient) {
+  constructor(mqttClient) {
+    this.mqttClient = mqttClient;
+    this.masterDeck = new MasterDeck();
+  }
+
+  async startGame() {
+    const [player1Deck, player2Deck] = await this.masterDeck.dealCards();
     this.player1Deck = player1Deck;
     this.player2Deck = player2Deck;
-    this.mqttClient = mqttClient;
-    this.player1MovePromise = new Promise((resolve) => {
+    this.mqttClient.subscribe('/game/noCards', (err, granted) => {
+      if (!err) {
+        this.mqttClient.on('message', (topic, message) => {
+          if (topic === '/game/noCards') {
+            const { playerId } = JSON.parse(message);
+            if (playerId === 1) {
+              this.endGame();
+              this.mqttClient.unsubscribe('/game/noCards');
+              this.mqttClient.publish('/game/end', 'Gracz 1 wygrał grę');
+              this.player1Deck = null;
+            } else {
+              this.endGame();
+              this.mqttClient.unsubscribe('/game/noCards');
+              this.mqttClient.publish('/game/end', 'Gracz 2 wygrał grę');
+              this.player2Deck = null;
+            }
+          }
+        });
+      }
+    });
+    while (this.player1Deck.cards.length > 0 && this.player2Deck.cards.length > 0) {
+      await this.playRound();
+    }
+    // inicjalizacja pozostałych elementów gry
+  }
+
+  async playRound() {
+    const player1MovePromise = new Promise((resolve) => {
       this.mqttClient.subscribe('/game/player1Move', (err, granted) => {
         if (!err) {
           this.mqttClient.on('message', (topic, message) => {
@@ -57,7 +95,7 @@ class GameManager {
         }
       });
     });
-    this.player2MovePromise = new Promise((resolve) => {
+    const player2MovePromise = new Promise((resolve) => {
       this.mqttClient.subscribe('/game/player2Move', (err, granted) => {
         if (!err) {
           this.mqttClient.on('message', (topic, message) => {
@@ -68,13 +106,12 @@ class GameManager {
         }
       });
     });
-  }
 
-  async playRound() {
-    await Promise.all([this.player1MovePromise, this.player2MovePromise]);
+    await Promise.all([player1MovePromise, player2MovePromise]);
     const player1Card = this.player1Deck.drawCard();
     const player2Card = this.player2Deck.drawCard();
     if (player1Card.value === player2Card.value) {
+      this.war = new War(this.player1Deck, this.player2Deck, this.mqttClient, player1Card, player2Card);
       this.war.start();
     } else {
       this.determineRoundWinner(player1Card, player2Card);
@@ -99,14 +136,14 @@ class GameManager {
 }
 
 class War {
-  constructor(player1Deck, player2Deck, mqttClient) {
+  constructor(player1Deck, player2Deck, mqttClient, player1Card, player2Card) {
     this.player1Deck = player1Deck;
     this.player2Deck = player2Deck;
     this.mqttClient = mqttClient;
-    this.player1Card;
-    this.player2Card;
-    this.player1WarCards = [];
-    this.player2WarCards = [];
+    // this.player1Card;
+    // this.player2Card;
+    this.player1WarCards = [player1Card];
+    this.player2WarCards = [player2Card];
     this.player1Move1Promise = new Promise((resolve) => {
       this.mqttClient.subscribe('/game/player1Move1', (err, granted) => {
         if (!err) {
@@ -234,14 +271,16 @@ class War {
       this.continueWar();
     } else if (this.player1Card2.value > this.player2Card2.value) {
       this.endWar("gracz 1 wygrywa");
+      this.mqttClient.publish('/game/round/result', 'Gracz 1 wygrał rundę');
     } else {
       this.endWar("gracz 2 wygrywa");
+      this.mqttClient.publish('/game/round/result', 'Gracz w wygrał rundę');
     }
   }
 
 
   endWar(winner) {
-    if(winner === "Player 1 wins") {
+    if(winner === "gracz 1 wygrywa") {
       this.player1Deck.addCard(...this.player1WarCards);
       this.player1Deck.addCard(...this.player2WarCards);
       this.mqttClient.publish('/game/war/result', 'Gracz 1 wygrał wojnę');
@@ -250,9 +289,72 @@ class War {
       this.player2Deck.addCard(...this.player2WarCards);
       this.mqttClient.publish('/game/war/result', 'Gracz 2 wygrał wojnę');
     }
+    this.gameManager.war = null;
   }
 }
-  
-  
-  
-  
+
+class MasterDeck {
+  constructor(mqttClient) {
+    this.cards = [];
+    this.mqttClient = mqttClient;
+    this.initializeDeck();
+    // this.player1ReadyPromise = new Promise((resolve) => {
+    //   this.mqttClient.subscribe('/game/player1Ready', (err, granted) => {
+    //     if (!err) {
+    //       this.mqttClient.on('message', (topic, message) => {
+    //         if (topic === '/game/player1Ready') {
+    //           resolve();
+    //         }
+    //       });
+    //     }
+    //   });
+    // });
+    // this.player2ReadyPromise = new Promise((resolve) => {
+    //   this.mqttClient.subscribe('/game/player2Ready', (err, granted) => {
+    //     if (!err) {
+    //       this.mqttClient.on('message', (topic, message) => {
+    //         if (topic === '/game/player2Ready') {
+    //           resolve();
+    //         }
+    //       });
+    //     }
+    //   });
+    // });
+  }
+
+  initializeDeck() {
+    const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
+    for (let i = 2; i <= 14; i++) {
+      for (let j = 0; j < suits.length; j++) {
+        this.cards.push(new Card(i, suits[j]));
+      }
+    }
+    this.shuffle();
+  }
+
+  shuffle() {
+    for (let i = this.cards.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
+    }
+  }
+
+  // async dealCards() {
+  dealCards() {
+    // await Promise.all([this.player1ReadyPromise, this.player2ReadyPromise]);
+    const player1Deck = new Deck(1, this.mqttClient);
+    const player2Deck = new Deck(2, this.mqttClient);
+    for (let i = 0; i < 26; i++) {
+      player1Deck.addCard(this.cards.shift());
+      player2Deck.addCard(this.cards.shift());
+    }
+    return [player1Deck, player2Deck];
+  }
+}
+
+module.exports = {
+  Card,
+  Deck,
+  GameManager
+}
+

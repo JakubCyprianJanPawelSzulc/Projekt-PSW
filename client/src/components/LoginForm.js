@@ -2,11 +2,12 @@ import { useFormik } from 'formik';
 import React, {useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCookies} from 'react-cookie';
+import { useDispatch } from 'react-redux';
+import { loginAction } from '../actions/loginActions.js';
 
-
-// import fetch from 'node-fetch';
 
 export default function LoginForm() {
+  const dispatch = useDispatch();
   const [cookies, setCookie] = useCookies(['id']);
   const navigate = useNavigate()
   const formik = useFormik({
@@ -25,11 +26,19 @@ export default function LoginForm() {
             // console.log(res.headers.get('Set-Cookie'))
             // const cookies = res.headers.get('set-cookie');
             // const id = cookies.split(';').find(cookie => cookie.startsWith('id'));
-            setCookie('id', res.id, {path:'/'});
+            // setCookie('id', res.id, {path:'/'});
             // setCookie('id', cookies.id, { path: '/' });
-            alert('Zalogowano')
-            navigate('/MainPage')
-            return res.json()
+            res.json().then(data=>{
+              if(data.id) {
+                const id = data.id;
+                dispatch(loginAction(id));
+                alert('Zalogowano');
+                navigate('/MainPage');
+                
+              } else {
+                  throw new Error("id not found in server response")
+              }
+            })
         } else {
             alert('Wrong login or password')
         }

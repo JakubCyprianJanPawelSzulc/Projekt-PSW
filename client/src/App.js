@@ -6,6 +6,7 @@ import RegisterForm from './components/RegisterForm.js';
 import Chat from './components/Chat.js';
 import MainPage from './components/MainPage.js';
 import UserData from './components/UserData.js';
+import Game from './components/Game.js';
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
         <Route path="RegisterPage" element={<RegisterForm/>} />
         <Route path="MainPage" element={<MainPage/>} />
         <Route path="UserData" element={<UserData/>} />
+        <Route path="Game" element={<Game/>} />
       </Routes>
     </div>
   );
