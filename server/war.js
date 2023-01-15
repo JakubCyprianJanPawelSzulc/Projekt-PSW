@@ -85,10 +85,10 @@ class GameManager {
 
   async playRound() {
     const player1MovePromise = new Promise((resolve) => {
-      this.mqttClient.subscribe('/game/player1Move', (err, granted) => {
+      this.mqttClient.subscribe('/game/player1Move1', (err, granted) => {
         if (!err) {
           this.mqttClient.on('message', (topic, message) => {
-            if (topic === '/game/player1Move') {
+            if (topic === '/game/player1Move1') {
               resolve();
             }
           });
@@ -96,10 +96,10 @@ class GameManager {
       });
     });
     const player2MovePromise = new Promise((resolve) => {
-      this.mqttClient.subscribe('/game/player2Move', (err, granted) => {
+      this.mqttClient.subscribe('/game/player2Move1', (err, granted) => {
         if (!err) {
           this.mqttClient.on('message', (topic, message) => {
-            if (topic === '/game/player2Move') {
+            if (topic === '/game/player2Move1') {
               resolve();
             }
           });
@@ -298,28 +298,6 @@ class MasterDeck {
     this.cards = [];
     this.mqttClient = mqttClient;
     this.initializeDeck();
-    // this.player1ReadyPromise = new Promise((resolve) => {
-    //   this.mqttClient.subscribe('/game/player1Ready', (err, granted) => {
-    //     if (!err) {
-    //       this.mqttClient.on('message', (topic, message) => {
-    //         if (topic === '/game/player1Ready') {
-    //           resolve();
-    //         }
-    //       });
-    //     }
-    //   });
-    // });
-    // this.player2ReadyPromise = new Promise((resolve) => {
-    //   this.mqttClient.subscribe('/game/player2Ready', (err, granted) => {
-    //     if (!err) {
-    //       this.mqttClient.on('message', (topic, message) => {
-    //         if (topic === '/game/player2Ready') {
-    //           resolve();
-    //         }
-    //       });
-    //     }
-    //   });
-    // });
   }
 
   initializeDeck() {

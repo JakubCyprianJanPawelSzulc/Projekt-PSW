@@ -1,5 +1,10 @@
 const mqtt = require('mqtt');
-const client = mqtt.connect('ws://test.mosquitto.org/');
+const client = mqtt.connect('ws://localhost:8083');
+client.on('connect', () => {
+  console.log('Connected to MQTT broker.');
+  client.publish('test', 'aaaaaaaaa');
+});
+
 const { Card, Deck, GameManager } = require('./war.js');
 
 const express = require('express');
