@@ -14,7 +14,7 @@ export default function UserData() {
         if(id){
             const fetchData = async () => {
                 try {
-                    const result = await axios.get(`http://localhost:3000/api/users/${id}`);
+                    const result = await axios.get(`http://localhost:5000/api/user/${id}`);
                     setUser(result.data);
                 } catch (error) {
                     setError(error);

@@ -16,7 +16,7 @@ export default function LoginForm() {
       password: '',
     },
     onSubmit: (values) => {
-      fetch('http://localhost:3000/login', {
+      fetch('http://localhost:5000/login', {
         method: 'POST',
         body: JSON.stringify(values),
         headers: { 'Content-Type': 'application/json' },
@@ -29,8 +29,8 @@ export default function LoginForm() {
             // setCookie('id', res.id, {path:'/'});
             // setCookie('id', cookies.id, { path: '/' });
             res.json().then(data=>{
-              if(data.id) {
-                const id = data.id;
+              if(data._id) {
+                const id = data._id;
                 dispatch(loginAction(id));
                 alert('Zalogowano');
                 navigate('/MainPage');

@@ -13,7 +13,7 @@ export default function RegisterForm() {
       password: '',
     },
     onSubmit: (values) => {
-      fetch('http://localhost:3000/register', {
+      fetch('http://localhost:5000/register', {
         method: 'POST',
         body: JSON.stringify(values),
         headers: { 'Content-Type': 'application/json' },

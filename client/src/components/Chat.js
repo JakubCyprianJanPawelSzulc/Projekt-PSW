@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Messages from './Messages.js';
 
 export default function LoginForm() {
+  const [playerId, setPlayerId] = useState(1);
   const formik = useFormik({
     initialValues: {
       id: uuidv4(),
@@ -19,6 +20,12 @@ export default function LoginForm() {
 
   return (
     <div className="messages-form">
+      <button onClick={() => setPlayerId(1)}>
+            1
+      </button>
+      <button onClick={() => setPlayerId(2)}>
+            2
+      </button>
       <form className="messages-form-contents" onSubmit={formik.handleSubmit}>
         <Messages />
         <input

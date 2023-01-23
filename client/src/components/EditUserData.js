@@ -12,7 +12,7 @@ export default function EditUserData() {
     if (id) {
       const fetchData = async () => {
         try {
-          const result = await axios.get(`http://localhost:3000/api/users/${id}`);
+          const result = await axios.get(`http://localhost:5000/api/user/${id}`);
           setUserData(result.data);
         } catch (error) {
           setError(error);
@@ -30,7 +30,7 @@ export default function EditUserData() {
     },
     onSubmit: async (values) => {
       try {
-        await axios.put(`http://localhost:3000/api/users/${id}`, values);
+        await axios.put(`http://localhost:5000/api/user/${id}`, values);
         console.log('Dane zostały zmienione');
       } catch (error) {
         setError(error);

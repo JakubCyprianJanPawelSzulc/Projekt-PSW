@@ -16,7 +16,7 @@ export default function DeleteUserData() {
         if(id){
             const fetchData = async () => {
                 try {
-                    const result = await axios.get(`http://localhost:3000/api/users/${id}`);
+                    const result = await axios.get(`http://localhost:5000/api/user/${id}`);
                     setUser(result.data);
                 } catch (error) {
                     setError(error);
@@ -28,7 +28,7 @@ export default function DeleteUserData() {
 
     const handleDelete = async () => {
         try {
-            const result = await axios.delete(`http://localhost:3000/api/users/${id}`);
+            const result = await axios.delete(`http://localhost:5000/api/user/${id}`);
             console.log(result);
         } catch (error) {
             setError(error);

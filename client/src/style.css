@@ -27,3 +27,21 @@ input{
     flex-direction: column;
     margin: auto;
 }
+
+.other-user-data{
+    background-color: darkblue;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin: 10px;
+}
+
+.main-page{
+    background-color: darkblue;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin: 10px;
+}
