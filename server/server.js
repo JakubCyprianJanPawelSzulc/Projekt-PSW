@@ -8,6 +8,7 @@ app.use(express.json());
 app.use(require("./routes/routes"));
 
 const dbo = require("./db/conn");
+let readyPlayerCount = 0;
 
 app.listen(port, () => {
   dbo.connectToServer(function (err) {
@@ -27,4 +28,3 @@ app.post('/ready', (req, res) => {
   }
 });
 
-//let readyPlayerCount = 0;

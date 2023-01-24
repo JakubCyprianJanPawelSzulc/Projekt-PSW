@@ -95,16 +95,6 @@ routes.route("/api/user/search/:username").get(function (req, res){
     );
 });
 
-// routes.route("/api/user/search/:username").get(function (req, res) {
-//     let db_connect = dbo.getDb("myDatabase");
-//     let myquery = { username: req.params.username };
-//     db_connect.collection("users").findOne
-//         (myquery, function (err, result) {
-//             if (err) throw err;
-//             res.json(result);
-//         }
-//         );
-// });
 
 
 module.exports = routes;

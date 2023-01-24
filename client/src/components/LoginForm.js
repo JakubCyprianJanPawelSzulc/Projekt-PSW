@@ -8,8 +8,16 @@ import { loginAction } from '../actions/loginActions.js';
 
 export default function LoginForm() {
   const dispatch = useDispatch();
-  const [cookies, setCookie] = useCookies(['id']);
+  const [cookies, setCookie] = useCookies('id');
   const navigate = useNavigate()
+
+  const handleCookie = (id) => {
+    let time = new Date();
+    time.setMinutes(time.getMinutes() + 30);
+    setCookie('id', id, { path: '/' });
+  };
+
+
   const formik = useFormik({
     initialValues: {
       username: '',
@@ -23,13 +31,9 @@ export default function LoginForm() {
       })
       .then((res) =>{
         if(res.status === 200){ 
-            // console.log(res.headers.get('Set-Cookie'))
-            // const cookies = res.headers.get('set-cookie');
-            // const id = cookies.split(';').find(cookie => cookie.startsWith('id'));
-            // setCookie('id', res.id, {path:'/'});
-            // setCookie('id', cookies.id, { path: '/' });
             res.json().then(data=>{
               if(data._id) {
+                handleCookie(data._id);
                 const id = data._id;
                 dispatch(loginAction(id));
                 alert('Zalogowano');

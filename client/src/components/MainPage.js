@@ -19,6 +19,9 @@ export default function MainPage() {
         <button onClick={playGame}>
           <Link to="/Game">rozpocznij grę</Link>
         </button>
+        <button>
+          <Link to="/Chat">chat</Link>
+        </button>
         <SearchUser />
     </div>
   );
