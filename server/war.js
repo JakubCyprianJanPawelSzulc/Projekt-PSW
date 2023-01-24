@@ -1,9 +1,15 @@
-const mqtt = require('mqtt');
-const client = mqtt.connect('mqtt://test.mosquitto.org');
+// const mqtt = require('mqtt');
+// const client = mqtt.connect('ws://localhost:8083/mqtt');
 
-client.on('connect', () => {
-    console.log('Połączono z serwerem MQTT');
-});
+// client.on('connect', () => {
+//     console.log('Połączono z serwerem MQTT');
+//     client.subscribe('/test', (err) => {
+//         if (!err) {
+//             client.publish('/test', 'gra w wojne dziala')
+//         }
+//     }
+//     );
+// });
 
 class Card {
     constructor(value, suit, mqttClient) {
@@ -50,11 +56,11 @@ class Deck {
 class GameManager {
   constructor(mqttClient) {
     this.mqttClient = mqttClient;
-    this.masterDeck = new MasterDeck();
+    this.masterDeck = new MasterDeck(this.mqttClient);
   }
 
   async startGame() {
-    const [player1Deck, player2Deck] = await this.masterDeck.dealCards();
+    const [player1Deck, player2Deck] = this.masterDeck.dealCards();
     this.player1Deck = player1Deck;
     this.player2Deck = player2Deck;
     this.mqttClient.subscribe('/game/noCards', (err, granted) => {
@@ -84,6 +90,7 @@ class GameManager {
   }
 
   async playRound() {
+    this.mqttClient.publish('/game/round/start', 'Rozpoczęcie rundy');
     const player1MovePromise = new Promise((resolve) => {
       this.mqttClient.subscribe('/game/player1Move1', (err, granted) => {
         if (!err) {
@@ -111,6 +118,7 @@ class GameManager {
     const player1Card = this.player1Deck.drawCard();
     const player2Card = this.player2Deck.drawCard();
     if (player1Card.value === player2Card.value) {
+      this.mqttClient.publish('/game/war/start', 'wojna!');
       this.war = new War(this.player1Deck, this.player2Deck, this.mqttClient, player1Card, player2Card);
       this.war.start();
     } else {
@@ -200,8 +208,9 @@ class War {
     this.player1WarCards.push(player1Card2);
     this.player2WarCards.push(player2Card1);
     this.player2WarCards.push(player2Card2);
-    this.mqttClient.publish('/game/war', JSON.stringify({player1Card1:this.player1Card1, player2Card1:this.player2Card1,player1Card2:this.player1Card2, player2Card2:this.player2Card2}));
+    this.mqttClient.publish('/game/war/cards', JSON.stringify({player1Card1:this.player1Card1, player2Card1:this.player2Card1,player1Card2:this.player1Card2, player2Card2:this.player2Card2}));
     if(this.player1Card2.value === this.player2Card2.value) {
+      this.mqttClient.publish('/game/war/start', 'wojna!');
       this.continueWar();
     } else if (this.player1Card2.value > this.player2Card2.value) {
       this.endWar("gracz 1 wygrywa");
@@ -266,15 +275,16 @@ class War {
     this.player2WarCards.push(player2Card3);
     this.player1WarCards.push(player1Card4);
     this.player2WarCards.push(player2Card4);
-    this.mqttClient.publish('/game/war', JSON.stringify({player1WarCard:player1Card4, player2WarCard:player2Card4}));
+    this.mqttClient.publish('/game/war/cards', JSON.stringify({player1WarCard:player1Card4, player2WarCard:player2Card4}));
     if(this.player1Card4.value === this.player2Card4.value) {
+      this.mqttClient.publish('/game/war/start', 'wojna!');
       this.continueWar();
     } else if (this.player1Card2.value > this.player2Card2.value) {
       this.endWar("gracz 1 wygrywa");
-      this.mqttClient.publish('/game/round/result', 'Gracz 1 wygrał rundę');
+      this.mqttClient.publish('/game/round/result', 'Gracz 1 wygrał wojnę');
     } else {
       this.endWar("gracz 2 wygrywa");
-      this.mqttClient.publish('/game/round/result', 'Gracz w wygrał rundę');
+      this.mqttClient.publish('/game/round/result', 'Gracz w wygrał wojnę');
     }
   }
 
@@ -304,7 +314,7 @@ class MasterDeck {
     const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
     for (let i = 2; i <= 14; i++) {
       for (let j = 0; j < suits.length; j++) {
-        this.cards.push(new Card(i, suits[j]));
+        this.cards.push(new Card(i, suits[j], this.mqttClient));
       }
     }
     this.shuffle();
