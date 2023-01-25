@@ -10,6 +10,7 @@ function Game() {
   const [isConnected, setIsConnected] = useState(false);
   const [client, setClient] = useState(null);
   const [result,setResult] = useState([])
+  const [cards,setCards] = useState([])
 
   useEffect(()=>{
     const client=mqtt.connect('ws://localhost:8083/mqtt')
@@ -22,11 +23,21 @@ function Game() {
       client.subscribe("/game/war/result");
       client.subscribe("/game/war/start")
       client.subscribe("/game/end");
+
+      client.subscribe("/game/round/card")
+      client.subscribe("/game/war/card")
+
       setIsSubscribed(true);
     }
     if (isSubscribed){
       client.on("message", (topic, message) => {
-        setResult((prev)=>[...prev, message.toString()]);
+        if (topic === "/round/card" || topic === "/war/card") {
+          setCards((prev)=>[...prev, message.toString()]);
+        }
+        else{
+          setResult((prev)=>[...prev, message.toString()]);
+        }
+        // setResult((prev)=>[...prev, message.toString()]);
       });
     }
     setClient(client)
@@ -50,7 +61,7 @@ function Game() {
     client.publish('/game/player2Move1', JSON.stringify({ value: 'player2 move' }));
   }
   const handlePlayer2Move2 = () => {
-    client.publish('/game/player1Move2', JSON.stringify({ value: 'player1 move' }));
+    client.publish('/game/player2Move2', JSON.stringify({ value: 'player1 move' }));
   }
 
   return (
@@ -66,6 +77,9 @@ function Game() {
       { playerId === 2 && <button onClick={handlePlayer2Move1}>Player 2 Move 1</button> }
       { playerId === 2 && <button onClick={handlePlayer2Move2}>Player 2 Move 2</button> }
       {result.map((message, index) => (
+          <div key={index}>{message}</div>
+        ))}
+      {cards.map((message, index) => (
           <div key={index}>{message}</div>
         ))}
     </div>
