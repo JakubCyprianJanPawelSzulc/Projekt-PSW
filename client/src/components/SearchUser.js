@@ -41,9 +41,6 @@ export default function SearchUser() {
     
     if (error===null) return (
         <div className="user-data">
-            <button>
-                <Link to="/MainPage">powrót</Link>
-            </button>
             <input required type="text" value={username} onChange={handleChange} placeholder="wyszukaj użytkownika"/>
             <button onClick={handleSearch}>szukaj</button>
             {userData.length>0 ? (userData.map((el) => (

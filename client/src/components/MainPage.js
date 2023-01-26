@@ -12,7 +12,7 @@ export default function MainPage() {
   }
   return (
     <div className="main-page">
-      strona główna
+      <h1>Strona główna</h1>
         <button>
             <Link to="/UserData">dane użytkownika</Link>
         </button>

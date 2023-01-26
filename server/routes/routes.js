@@ -95,6 +95,59 @@ routes.route("/api/user/search/:username").get(function (req, res){
     );
 });
 
+//add +1 played game to user
+
+routes.route("/api/user/:id/addgame").put(function (req, res) {
+    let db_connect = dbo.getDb("myDatabase");
+    let myquery = { _id: ObjectId(req.params.id) };
+    let newvalues = {
+        $inc: {
+            games_played: 1,
+        }
+    };
+    db_connect.collection("users").updateOne(myquery, newvalues, function (err, result) {
+            if (err) throw err;
+            res.json(result);
+        }
+    );
+});
+
+//add +1 win to user
+
+routes.route("/api/user/:id/addwin").put(function (req, res) {
+    let db_connect = dbo.getDb("myDatabase");
+    let myquery = { _id: ObjectId(req.params.id) };
+    let newvalues = {
+        $inc: {
+            wins: 1,
+        }
+    };
+    db_connect.collection('users').updateOne(myquery, newvalues, function (err, result) {
+            if (err) throw err;
+            res.json(result);
+        }
+    );
+});
+
+//add +1 loss to user
+
+routes.route("/api/user/:id/addloss").put(function (req, res) {
+    let db_connect = dbo.getDb("myDatabase");
+    let myquery = { _id: ObjectId(req.params.id) };
+    let newvalues = {
+        $inc: {
+            losses: 1,
+        }
+    };
+    db_connect.collection('users').updateOne(myquery, newvalues, function (err, result) {
+            if (err) throw err;
+            res.json(result);
+        }
+    );
+});
+
+
+
 
 
 module.exports = routes;

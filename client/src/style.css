@@ -45,3 +45,19 @@ input{
     flex-direction: column;
     margin: 10px;
 }
+.normal-cards{
+    display: flex;
+    flex-direction: row;
+}
+.war-cards{
+    display: flex;
+    flex-direction: row;
+}
+.p1-war-cards{
+    display: flex;
+    flex-direction: column;
+}
+.p2-war-cards{
+    display: flex;
+    flex-direction: column;
+}

@@ -75,6 +75,7 @@ class GameManager {
       }
     });
     while (this.player1Deck.cards.length > 0 && this.player2Deck.cards.length > 0) {
+      this.mqttClient.publish('/game/decks', 'player1: ' + this.player1Deck.cards.length + ' ' + 'player2: ' + this.player2Deck.cards.length);
       await this.playRound();
       if (this.player1Deck.cards.length===0) {
         this.mqttClient.publish('/game/end', 'Gracz 2 wygrał grę');
@@ -114,8 +115,9 @@ class GameManager {
     await Promise.all([player1MovePromise, player2MovePromise]);
     const player1Card = this.player1Deck.drawCard();
     const player2Card = this.player2Deck.drawCard();
-    this.mqttClient.publish('/game/round/card', 'Gracz 1: ' + player1Card.value + '' + player1Card.suit + ' Gracz 2: ' + player2Card.value + '' + player2Card.suit);
-    console.log('p1: '+this.player1Deck.cards.length, 'p2: '+this.player2Deck.cards.length)
+    this.mqttClient.publish('/game/round/player1/card', player1Card.value + ' ' + player1Card.suit);
+    this.mqttClient.publish('/game/round/player2/card', player2Card.value + ' ' + player2Card.suit);
+    // console.log('p1: '+this.player1Deck.cards.length, 'p2: '+this.player2Deck.cards.length)
     if (player1Card.value === player2Card.value) {
       this.mqttClient.publish('/game/war/start', 'wojna!');
       this.war = new War(this.player1Deck, this.player2Deck, this.mqttClient, player1Card, player2Card);
@@ -207,14 +209,18 @@ class War {
     const player1Card2 = this.player1Deck.drawCard();
     const player2Card2 = this.player2Deck.drawCard();
 
-    this.mqttClient.publish('/game/war/card', 'Gracz 1: ' + player1Card1.value +  '' + player1Card1.suit + ' Gracz 2: ' + player2Card1.value +  '' + player2Card1.suit + ' Gracz 1: ' + player1Card2.value +  '' + player1Card2.suit + ' Gracz 2: ' + player2Card2.value +  '' +player2Card2.suit);
-
     console.log('cards drawn')
     this.player1WarCards.push(player1Card1);
     this.player1WarCards.push(player1Card2);
     this.player2WarCards.push(player2Card1);
     this.player2WarCards.push(player2Card2);
-    this.mqttClient.publish('/game/war/cards', JSON.stringify({player1Card1:this.player1Card1, player2Card1:this.player2Card1,player1Card2:this.player1Card2, player2Card2:this.player2Card2}));
+
+        // this.mqttClient.publish('/game/war/card', 'Gracz 1: ' + player1Card1.value +  '' + player1Card1.suit + ' Gracz 2: ' + player2Card1.value +  '' + player2Card1.suit + ' Gracz 1: ' + player1Card2.value +  '' + player1Card2.suit + ' Gracz 2: ' + player2Card2.value +  '' +player2Card2.suit);
+        this.mqttClient.publish('/game/war/player1/card', player1Card2.value + ' ' + player1Card2.suit);
+        // this.mqttClient.publish('/game/war/player2/card', player2Card1.value +  '' + player2Card1.suit + ' ' + player2Card2.value +  '' + player2Card2.suit);
+        this.mqttClient.publish('/game/war/player2/card', player2Card2.value + ' ' + player2Card2.suit);
+
+    // this.mqttClient.publish('/game/war/cards', JSON.stringify({player1Card1:this.player1Card1, player2Card1:this.player2Card1,player1Card2:this.player1Card2, player2Card2:this.player2Card2}));
     if(player1Card2.value === player2Card2.value) {
       this.mqttClient.publish('/game/war/start', 'wojna!');
       await this.continueWar();
@@ -281,7 +287,10 @@ class War {
     this.player1WarCards.push(player1Card4);
     this.player2WarCards.push(player2Card4);
 
-    this.mqttClient.publish('/game/war/card', 'Gracz 1: ' + player1Card3.value +  '' + player1Card3.suit + ' Gracz 2: ' + player2Card3.value +  '' + player2Card3.suit + ' Gracz 1: ' + player1Card4.value +  '' + player1Card4.suit + ' Gracz 2: ' + player2Card4.value +  '' +player2Card4.suit);
+    this.mqttClient.publish('/game/war/player1/card', player1Card4.value + ' ' + player1Card4.suit);
+    this.mqttClient.publish('/game/war/player2/card', player2Card4.value + ' ' + player2Card4.suit);
+
+    // this.mqttClient.publish('/game/war/card', 'Gracz 1: ' + player1Card3.value +  '' + player1Card3.suit + ' Gracz 2: ' + player2Card3.value +  '' + player2Card3.suit + ' Gracz 1: ' + player1Card4.value +  '' + player1Card4.suit + ' Gracz 2: ' + player2Card4.value +  '' +player2Card4.suit);
     if(player1Card4.value === player2Card4.value) {
       this.mqttClient.publish('/game/war/start', 'wojna!');
       await this.continueWar();
