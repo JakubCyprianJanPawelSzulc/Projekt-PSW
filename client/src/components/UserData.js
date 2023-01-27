@@ -4,11 +4,20 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import DeleteUserData from './DeleteUserData.js';
 import EditUserData from './EditUserData.js';
+import { useCookies } from 'react-cookie';
 
 export default function UserData() {
-    const id = useSelector(state => state.login.userId);
+    // const id = useSelector(state => state.login.userId);
     const [user, setUser] = useState({});
     const [error, setError] = useState(null);
+    
+    function getCookie(name) {
+        var value = "; " + document.cookie;
+        var parts = value.split("; " + name + "=");
+        if (parts.length == 2) return parts.pop().split(";").shift();
+    }
+      
+    const id = getCookie('id');
 
     useEffect(() => {
         if(id){

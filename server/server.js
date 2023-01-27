@@ -41,3 +41,11 @@ app.post('/ready', (req, res) => {
   }
 });
 
+app.post('/giveUp', (req, res) => {
+  gotowiGracze=0;
+  console.log('koniec gry')
+  client.publish('endGame', 'koniec gry')
+})
+
+
+

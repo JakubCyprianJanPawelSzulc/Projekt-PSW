@@ -9,7 +9,14 @@ export default function Chat() {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [client, setClient] = useState(null);
-  const [chat, setChat] = useState([])
+  const [chat, setChat] = useState([]);
+
+  function getCookie(name) {
+    var value = "; " + document.cookie;
+    var parts = value.split("; " + name + "=");
+    if (parts.length == 2) return parts.pop().split(";").shift();
+  }
+  const name = getCookie('name');
 
   useEffect(()=>{
     const client=mqtt.connect('ws://localhost:8083/mqtt')
@@ -40,7 +47,7 @@ export default function Chat() {
       message: '',
     },
     onSubmit: (values) => {
-      client.publish(`/chat/message`, values.message);
+      client.publish(`/chat/message`, `${name}: ${values.message}`);
       formik.resetForm({
         values: { message: '' },
       });

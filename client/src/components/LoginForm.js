@@ -17,6 +17,12 @@ export default function LoginForm() {
     setCookie('id', id, { path: '/' });
   };
 
+  const handleCookieName = (name) => {
+    let time = new Date();
+    time.setMinutes(time.getMinutes() + 30);
+    setCookie('name', name, { path: '/' });
+  };
+
 
   const formik = useFormik({
     initialValues: {
@@ -34,11 +40,11 @@ export default function LoginForm() {
             res.json().then(data=>{
               if(data._id) {
                 handleCookie(data._id);
+                handleCookieName(data.username);
                 const id = data._id;
                 dispatch(loginAction(id));
                 alert('Zalogowano');
                 navigate('/MainPage');
-                
               } else {
                   throw new Error("id not found in server response")
               }

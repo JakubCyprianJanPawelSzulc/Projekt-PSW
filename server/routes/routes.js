@@ -146,6 +146,20 @@ routes.route("/api/user/:id/addloss").put(function (req, res) {
     );
 });
 
+routes.route("/api/user/:id/giveUp").put(function (req, res) {
+    let db_connect = dbo.getDb("myDatabase");
+    let myquery = { _id: ObjectId(req.params.id) };
+    let newvalues = {
+        $inc: {
+            losses: 1,
+        }
+    };
+    db_connect.collection('users').updateOne(myquery, newvalues, function (err, result) {
+            if (err) throw err;
+            res.json(result);
+        }
+    );
+});
 
 
 
