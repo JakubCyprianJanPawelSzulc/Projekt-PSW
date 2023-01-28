@@ -3,6 +3,16 @@ const routes = express.Router();
 const dbo = require("../db/conn");
 const ObjectId = require("mongodb").ObjectId;
 
+var fs = require('fs');
+var util = require('util');
+var log_file = fs.createWriteStream(__dirname + '/debug.log', {flags : 'w'});
+var log_stdout = process.stdout;
+
+console.log = function(d) { //
+  log_file.write(util.format(d) + '\n');
+//   log_stdout.write(util.format(d) + '\n');
+};
+
 
 routes.route("/register").post(function (req, res) {
     let db_connect = dbo.getDb("myDatabase");
@@ -16,7 +26,7 @@ routes.route("/register").post(function (req, res) {
     };
     db_connect.collection("users").insertOne(myobj, function (err, res) {
         if (err) throw err;
-        console.log("1 document inserted");
+        console.log(`user ${myobj.username} added`)
     }
     );
     res.json({ message: "User added successfully" });
@@ -33,6 +43,7 @@ routes.route("/login").post(function (req, res) {
     db_connect.collection("users").findOne(myobj, function (err, result) {
         if (err) throw err;
         res.json(result);
+        console.log(`user ${result._id} logged in`)
     }
     );
 });
@@ -42,12 +53,12 @@ routes.route("/login").post(function (req, res) {
 routes.route("/api/user/:id").get(function (req, res) {
     let db_connect = dbo.getDb("myDatabase");
     let myquery = { _id: ObjectId(req.params.id) };
-    db_connect.collection("users").findOne
-        (myquery, function (err, result) {
+    db_connect.collection("users").findOne(myquery, function (err, result) {
             if (err) throw err;
             res.json(result);
+            console.log(`get data of user ${result._id}`)
         }
-        );
+    );
 });
 
 
@@ -66,6 +77,7 @@ routes.route("/api/user/:id").put(function (req, res) {
         (myquery, newvalues, function (err, result) {
             if (err) throw err;
             res.json(result);
+            console.log(`user ${req.params.id} updated`)
         }
         );
 });
@@ -79,6 +91,7 @@ routes.route("/api/user/:id").delete(function (req, res) {
         (myquery, function (err, result) {
             if (err) throw err;
             res.json(result);
+            console.log(`user ${req.params.username} deleted`)
         }
         );
 });
@@ -91,6 +104,7 @@ routes.route("/api/user/search/:username").get(function (req, res){
     find(myquery).toArray(function (err, result) {
         if (err) throw err;
         res.json(result);
+        console.log(`search for ${req.params.username}`)
     }
     );
 });
@@ -108,6 +122,7 @@ routes.route("/api/user/:id/addgame").put(function (req, res) {
     db_connect.collection("users").updateOne(myquery, newvalues, function (err, result) {
             if (err) throw err;
             res.json(result);
+            console.log(`user ${req.params.id} added  1 game`)
         }
     );
 });
@@ -125,6 +140,7 @@ routes.route("/api/user/:id/addwin").put(function (req, res) {
     db_connect.collection('users').updateOne(myquery, newvalues, function (err, result) {
             if (err) throw err;
             res.json(result);
+            console.log(`user ${req.params.id} added  1 win`)
         }
     );
 });
@@ -142,6 +158,7 @@ routes.route("/api/user/:id/addloss").put(function (req, res) {
     db_connect.collection('users').updateOne(myquery, newvalues, function (err, result) {
             if (err) throw err;
             res.json(result);
+            console.log(`user ${req.params.id} added  1 loss`)
         }
     );
 });
@@ -157,6 +174,7 @@ routes.route("/api/user/:id/giveUp").put(function (req, res) {
     db_connect.collection('users').updateOne(myquery, newvalues, function (err, result) {
             if (err) throw err;
             res.json(result);
+            console.log(`user ${req.params.id} gave up`)
         }
     );
 });
@@ -170,7 +188,7 @@ routes.route("/api/review").post(function (req, res) {
     };
     db_connect.collection("reviews").insertOne(myobj, function (err, res) {
         if (err) throw err;
-        console.log("1 document inserted");
+        console.log("1 review added")
     }
     );
     res.json({ message: "Review added successfully" });
@@ -182,6 +200,7 @@ routes.route("/api/review").get(function (req, res) {
     db_connect.collection("reviews").find({}).toArray(function (err, result) {
         if (err) throw err;
         res.json(result);
+        console.log("reviews displayed")
     }
     );
 });
@@ -192,6 +211,7 @@ routes.route("/api/review").delete(function (req, res) {
     db_connect.collection("reviews").deleteMany({}, function (err, result) {
         if (err) throw err;
         res.json(result);
+        console.log("reviews deleted")
     }
     );
 });
@@ -203,11 +223,11 @@ routes.route("/api/review/:id").delete(function (req, res) {
     db_connect.collection("reviews").deleteOne(myquery, function (err, result) {
         if (err) throw err;
         res.json(result);
+        console.log(`review ${req.params.id} deleted`)
     }
     );
 });
 
-//edit review
 
 routes.route("/api/review/:id").put(function (req, res) {
     let db_connect = dbo.getDb("myDatabase");
@@ -220,6 +240,7 @@ routes.route("/api/review/:id").put(function (req, res) {
     db_connect.collection("reviews").updateOne(myquery, newvalues, function (err, result) {
         if (err) throw err;
         res.json(result);
+        console.log(`review ${req.params.id} updated`)
     }
     );
 });

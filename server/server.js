@@ -10,14 +10,16 @@ const mqtt = require("mqtt");
 let gameManager=null
 const { Card, Deck, GameManager } = require('./war.js');
 
-const client = mqtt.connect('ws://localhost:8083/mqtt')
-client.on('connect', () => {
-  client.subscribe('test', (err) => {
-    if (!err) {
-      client.publish('test', 'Hello mqtt')
-    }
-  })
-})
+// const client = mqtt.connect('ws://localhost:8083/mqtt')
+// client.on('connect', () => {
+//   client.subscribe('test', (err) => {
+//     if (!err) {
+//       client.publish('test', 'Hello mqtt')
+//     }
+//   })
+// })
+
+let client = null
 
 const dbo = require("./db/conn");
 
@@ -31,6 +33,7 @@ app.listen(port, () => {
 });
 
 app.post('/ready', (req, res) => {
+  client = mqtt.connect('ws://localhost:8083/mqtt')
   gotowiGracze++;
   console.log(gotowiGracze)
   if (gotowiGracze == 2) {
@@ -46,6 +49,7 @@ app.post('/giveUp', (req, res) => {
   console.log('koniec gry')
   client.publish('endGame', 'koniec gry')
   gameManager = null;
+  client.end();
 })
 
 
