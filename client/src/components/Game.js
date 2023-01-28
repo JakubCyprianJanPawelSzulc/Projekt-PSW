@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 // require('url-polyfill');
 // const buffer = require('buffer');
 import mqtt from "precompiled-mqtt"
-import Chat from './Chat.js';
 import NormalCardsP1 from './NormalCardsP1.js';
 import NormalCardsP2 from './NormalCardsP2.js';
 import WarCardsP1 from './WarCardsP1.js';
 import WarCardsP2 from './WarCardsP2.js';
 import { Link } from 'react-router-dom';
+import {useFormik} from 'formik';
+import { v4 as uuidv4 } from 'uuid';
 
 // const client = mqtt.connect('ws://192.168.43.118:8080');
 
@@ -24,7 +25,10 @@ function Game() {
   const [war, setWar] = useState(false)
   const [gaveUp, setGaveUp] = useState(false)
 
+  const[chat, setChat] = useState([])
+
   const [playerId, setPlayerId] = useState(1);
+  const [ready, setReady] = useState(false);
 
 
   function getCookie(name) {
@@ -62,10 +66,22 @@ function Game() {
 
       client.subscribe("/game/giveUp")
 
+      client.subscribe("/game/chat")
+
+      client.subscribe("/game/ready")
+
       setIsSubscribed(true);
     }
     if (isSubscribed){
       client.on("message", (topic, message) => {
+        if (topic === "/game/ready"){
+          const data=JSON.parse(message)
+          if(data.userId!==id){
+            if (data.playerId === 1){
+              setPlayerId(2)
+            }
+          }
+        }
         if (topic === "/game/round/player1/card") {
           setCardsPlayer1(message.toString());
           console.log('round p1 '+message.toString())
@@ -139,8 +155,11 @@ function Game() {
         if (topic === "/game/giveUp"){
           setResult(message.toString());
           setGaveUp(true);
+          console.log(message.toString())
+          console.log(playerId)
           if(message.toString()==='player 1 się poddał'){
             if(playerId===2){
+              console.log('powinna się dodać wygrana')
               fetch(`http://localhost:5000/api/user/${id}/addwin`, {
                 method: 'PUT',
                 body: JSON.stringify({ ready: true }),
@@ -150,6 +169,7 @@ function Game() {
           }
           if(message.toString()==='player 2 się poddał'){
             if(playerId===1){
+              console.log('powinna się dodać wygrana')
               fetch(`http://localhost:5000/api/user/${id}/addwin`, {
                 method: 'PUT',
                 body: JSON.stringify({ ready: true }),
@@ -158,7 +178,9 @@ function Game() {
             }
           }
         }
-
+        if (topic === "/game/chat") {
+          setChat((messages) => [...messages, message.toString()]);
+        }
       });
     }
     setClient(client)
@@ -169,7 +191,18 @@ function Game() {
   }, [isConnected, isSubscribed]) 
 
 
-  
+  const formik = useFormik({
+    initialValues: {
+      id: uuidv4(),
+      message: '',
+    },
+    onSubmit: (values) => {
+      client.publish("/game/chat", `${name}: ${values.message}`);
+      formik.resetForm({
+        values: { message: '' },
+      });
+    },
+  });
   
 
   const handlePlayer1Move1 = () => {
@@ -206,34 +239,58 @@ function Game() {
 
   }
 
+  const handleReady = () => {
+    client.publish('/game/ready', JSON.stringify({ userId: id, playerId: playerId}));
+    setReady(true);
+  }
+
 
   return (
-    <div>
-        { gaveUp && 
+    <div className='game-main'>
+      <div className='game'>
+        {gaveUp && 
           <Link to='/MainPage'>
             <button>wróć</button>
           </Link>}
-        { !gaveUp &&
+        {!gaveUp && ready &&
           <Link to='/MainPage'>
             <button onClick={() => handleGiveUp(id)}>Poddaj się</button>
           </Link>
          }
-        
-        <button onClick={() => setPlayerId(1)}>
-            1
-        </button>
-        <button onClick={() => setPlayerId(2)}>
-            2
-        </button>
-      { playerId === 1 && <button onClick={handlePlayer1Move1}>Player 1 Move 1</button> }
-      { playerId === 1 && <button onClick={handlePlayer1Move2}>Player 1 Move 2</button> }
-      { playerId === 2 && <button onClick={handlePlayer2Move1}>Player 2 Move 1</button> }
-      { playerId === 2 && <button onClick={handlePlayer2Move2}>Player 2 Move 2</button> }
-      <p>{decks}</p>
-      <p>{result}</p>
-      <p className='normal-cards'><NormalCardsP1 cardsPlayer1={cardsPlayer1} /> <NormalCardsP2 cardsPlayer2={cardsPlayer2}/></p>
-      {war && <p className='war-cards'><WarCardsP1 warCardsPlayer1={warCardsPlayer1} /> <WarCardsP2 warCardsPlayer2={warCardsPlayer2}/></p>}
-      {/* <Chat /> */}
+
+        {!ready &&<button onClick={()=>handleReady()}>gotowy do gry</button>}
+
+        { playerId === 1 && ready && <button onClick={handlePlayer1Move1}>Player 1 Move 1</button> }
+        { playerId === 1 && ready && <button onClick={handlePlayer1Move2}>Player 1 Move 2</button> }
+        { playerId === 2 && ready && <button onClick={handlePlayer2Move1}>Player 2 Move 1</button> }
+        { playerId === 2 && ready && <button onClick={handlePlayer2Move2}>Player 2 Move 2</button> }
+        <p>{decks}</p>
+        <p>{result}</p>
+        <p className='normal-cards'><NormalCardsP1 cardsPlayer1={cardsPlayer1} /> <NormalCardsP2 cardsPlayer2={cardsPlayer2}/></p>
+        {war && <p className='war-cards'><WarCardsP1 warCardsPlayer1={warCardsPlayer1} /> <WarCardsP2 warCardsPlayer2={warCardsPlayer2}/></p>}
+      </div>
+      <div className='game-chat'>
+        <form className='game-chat-form' onSubmit={formik.handleSubmit}>
+          <input
+              value={formik.values.message}
+              name="message"
+              placeholder="wiadomość"
+              onChange={formik.handleChange}
+              required
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+            />
+            <button className="game-messages-submit-button" type="submit">
+              wyślij
+            </button>
+            <div className='game-chat-messages'>
+              {chat.map((message, index) => (
+              <p key={index}>{message}</p>
+            ))}
+        </div>
+        </form>
+      </div>
     </div>
   );
 }

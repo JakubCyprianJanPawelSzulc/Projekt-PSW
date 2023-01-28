@@ -65,3 +65,7 @@ input{
     width: 100px;
     height: 150px;
 }
+.game-main{
+    display:flex;
+    flex-direction: row;
+}

@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import mqtt from "precompiled-mqtt"
 import {useState} from 'react'
+import { Link } from 'react-router-dom';
 
 
 export default function Chat() {
@@ -38,7 +39,12 @@ export default function Chat() {
       client.end();
       setClient(null)
     }
-  }, [isConnected, isSubscribed])  
+  }, [isConnected, isSubscribed])
+
+  const handleBack = () => {
+    client.end();
+    setClient(null)
+  }
 
 
   const formik = useFormik({
@@ -57,6 +63,9 @@ export default function Chat() {
 
   return (
     <div className="messages-form">
+      <Link to="/MainPage">
+        <button className="messages-back-button" onClick={()=>handleBack()}>powrót</button>
+      </Link>
       <form className="messages-form-contents" onSubmit={formik.handleSubmit}>
         <input
           value={formik.values.message}

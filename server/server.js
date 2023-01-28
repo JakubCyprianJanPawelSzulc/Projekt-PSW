@@ -7,7 +7,7 @@ app.use(cors());
 app.use(express.json());
 app.use(require("./routes/routes"));
 const mqtt = require("mqtt");
-
+let gameManager=null
 const { Card, Deck, GameManager } = require('./war.js');
 
 const client = mqtt.connect('ws://localhost:8083/mqtt')
@@ -35,7 +35,7 @@ app.post('/ready', (req, res) => {
   console.log(gotowiGracze)
   if (gotowiGracze == 2) {
     console.log('rozpoczynam grę')
-    const gameManager = new GameManager(client);
+    gameManager = new GameManager(client);
     gameManager.startGame();
     gotowiGracze=0;
   }
@@ -45,6 +45,7 @@ app.post('/giveUp', (req, res) => {
   gotowiGracze=0;
   console.log('koniec gry')
   client.publish('endGame', 'koniec gry')
+  gameManager = null;
 })
 
 
