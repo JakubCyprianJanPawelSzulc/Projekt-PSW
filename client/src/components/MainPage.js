@@ -36,6 +36,9 @@ export default function MainPage() {
         <button>
           <Link to="/Chat">chat</Link>
         </button>
+        <button>
+          <Link to="/Reviews">opinie</Link>
+        </button>
         <SearchUser />
     </div>
   );

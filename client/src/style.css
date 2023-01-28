@@ -13,10 +13,19 @@ p {
     color: black;
 }
 
-input{
+input, textarea{
     background-color: cadetblue;
     color: black;
 
+}
+
+.review, .review-contents, .review-user{
+    background-color: cadetblue;
+    color: black;
+    width: 300px;
+}
+.review-user{
+    font-weight: bold;
 }
 
 .login-page, .register-form, .register-form-contents{

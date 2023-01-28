@@ -95,7 +95,7 @@ routes.route("/api/user/search/:username").get(function (req, res){
     );
 });
 
-//add +1 played game to user
+
 
 routes.route("/api/user/:id/addgame").put(function (req, res) {
     let db_connect = dbo.getDb("myDatabase");
@@ -112,7 +112,7 @@ routes.route("/api/user/:id/addgame").put(function (req, res) {
     );
 });
 
-//add +1 win to user
+
 
 routes.route("/api/user/:id/addwin").put(function (req, res) {
     let db_connect = dbo.getDb("myDatabase");
@@ -129,7 +129,7 @@ routes.route("/api/user/:id/addwin").put(function (req, res) {
     );
 });
 
-//add +1 loss to user
+
 
 routes.route("/api/user/:id/addloss").put(function (req, res) {
     let db_connect = dbo.getDb("myDatabase");
@@ -160,6 +160,72 @@ routes.route("/api/user/:id/giveUp").put(function (req, res) {
         }
     );
 });
+
+
+routes.route("/api/review").post(function (req, res) {
+    let db_connect = dbo.getDb("myDatabase");
+    let myobj = {
+        user: req.body.user,
+        contents: req.body.contents,
+    };
+    db_connect.collection("reviews").insertOne(myobj, function (err, res) {
+        if (err) throw err;
+        console.log("1 document inserted");
+    }
+    );
+    res.json({ message: "Review added successfully" });
+});
+
+
+routes.route("/api/review").get(function (req, res) {
+    let db_connect = dbo.getDb("myDatabase");
+    db_connect.collection("reviews").find({}).toArray(function (err, result) {
+        if (err) throw err;
+        res.json(result);
+    }
+    );
+});
+
+
+routes.route("/api/review").delete(function (req, res) {
+    let db_connect = dbo.getDb("myDatabase");
+    db_connect.collection("reviews").deleteMany({}, function (err, result) {
+        if (err) throw err;
+        res.json(result);
+    }
+    );
+});
+
+
+routes.route("/api/review/:id").delete(function (req, res) {
+    let db_connect = dbo.getDb("myDatabase");
+    let myquery = { _id: ObjectId(req.params.id) };
+    db_connect.collection("reviews").deleteOne(myquery, function (err, result) {
+        if (err) throw err;
+        res.json(result);
+    }
+    );
+});
+
+//edit review
+
+routes.route("/api/review/:id").put(function (req, res) {
+    let db_connect = dbo.getDb("myDatabase");
+    let myquery = { _id: ObjectId(req.params.id) };
+    let newvalues = {
+        $set: {
+            contents: req.body.contents,
+        }
+    };
+    db_connect.collection("reviews").updateOne(myquery, newvalues, function (err, result) {
+        if (err) throw err;
+        res.json(result);
+    }
+    );
+});
+
+
+
 
 
 

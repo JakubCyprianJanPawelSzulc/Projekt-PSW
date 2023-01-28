@@ -7,6 +7,7 @@ import Chat from './components/Chat.js';
 import MainPage from './components/MainPage.js';
 import UserData from './components/UserData.js';
 import Game from './components/Game.js';
+import Reviews from './components/Reviews.js';
 import { useCookies } from 'react-cookie';
 
 
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="UserData" element={<UserData/>} />
           <Route path="Game" element={<Game/>} />
           <Route path="Chat" element={<Chat/>}></Route>
+          <Route path="Reviews" element={<Reviews/>}></Route>
         </Routes>
 
     </div>
