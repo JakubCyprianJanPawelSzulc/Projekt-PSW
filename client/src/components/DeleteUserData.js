@@ -7,10 +7,15 @@ import { useSelector } from 'react-redux';
 
 
 export default function DeleteUserData() {
-    const id = useSelector(state => state.login.userId);
-    // const [cookies] = useCookies(['id']);
     const [user, setUser] = useState({});
     const [error, setError] = useState(null);
+
+    function getCookie(id){
+        var value = "; " + document.cookie;
+        var parts = value.split("; " + id + "=");
+        if (parts.length == 2) return parts.pop().split(";").shift();
+    }
+    const id = getCookie('id');
 
     useEffect(() => {
         if(id){
@@ -38,7 +43,7 @@ export default function DeleteUserData() {
 
     return(
         <button>
-            <Link to="/" onClick={handleDelete}>usuń dane</Link>
+            <Link to="/" onClick={handleDelete}>usuń konto</Link>
         </button>
     )
 

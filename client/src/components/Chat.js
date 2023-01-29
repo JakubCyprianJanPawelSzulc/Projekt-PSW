@@ -1,6 +1,5 @@
 import { useFormik } from 'formik';
 import React, { useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import mqtt from "precompiled-mqtt"
 import {useState} from 'react'
 import { Link } from 'react-router-dom';
@@ -49,7 +48,6 @@ export default function Chat() {
 
   const formik = useFormik({
     initialValues: {
-      id: uuidv4(),
       message: '',
     },
     onSubmit: (values) => {

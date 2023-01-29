@@ -1,13 +1,11 @@
 import { useFormik } from 'formik';
 import React from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { Link } from 'react-router-dom';
 // import fetch from 'node-fetch';
 
 export default function RegisterForm() {
   const formik = useFormik({
     initialValues: {
-      id: uuidv4(),
       username: '',
       email: '',
       password: '',
@@ -26,7 +24,7 @@ export default function RegisterForm() {
           console.error('Error:', error);
         });
       formik.resetForm({
-        values: { id: uuidv4(), password: '', email: '', username: '' },
+        values: { password: '', email: '', username: '' },
       });
     },
   });

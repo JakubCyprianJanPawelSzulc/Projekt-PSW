@@ -2,12 +2,10 @@ import { useFormik } from 'formik';
 import React, {useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCookies} from 'react-cookie';
-import { useDispatch } from 'react-redux';
 import { loginAction } from '../actions/loginActions.js';
 
 
 export default function LoginForm() {
-  const dispatch = useDispatch();
   const [cookies, setCookie] = useCookies('id');
   const navigate = useNavigate()
 
@@ -42,7 +40,6 @@ export default function LoginForm() {
                 handleCookie(data._id);
                 handleCookieName(data.username);
                 const id = data._id;
-                dispatch(loginAction(id));
                 alert('Zalogowano');
                 navigate('/MainPage');
               } else {

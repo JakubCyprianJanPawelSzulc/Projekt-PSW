@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import { useFormik } from 'formik';
 import axios from 'axios';
 
 export default function EditUserData() {
-  const id = useSelector(state => state.login.userId);
   const [userData, setUserData] = useState({});
   const [error, setError] = useState(null);
+
+  function getCookie(id){
+    var value = "; " + document.cookie;
+    var parts = value.split("; " + id + "=");
+    if (parts.length == 2) return parts.pop().split(";").shift();
+  }
+  const id = getCookie('id');
 
   useEffect(() => {
     if (id) {
@@ -52,6 +57,7 @@ export default function EditUserData() {
             placeholder="username"
             value={formik.values.username}
             onChange={formik.handleChange}
+            required
           />
         </label>
         <label>
@@ -61,6 +67,7 @@ export default function EditUserData() {
             placeholder="email"
             value={formik.values.email}
             onChange={formik.handleChange}
+            required
           />
         </label>
         <label>
@@ -69,6 +76,7 @@ export default function EditUserData() {
             name="password"
             placeholder="password"
             onChange={formik.handleChange}
+            required
           />
         </label>
 
