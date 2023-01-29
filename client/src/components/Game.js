@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom';
 import {useFormik} from 'formik';
 import { v4 as uuidv4 } from 'uuid';
 
+
 // const client = mqtt.connect('ws://192.168.43.118:8080');
 
 function Game() {
@@ -245,6 +246,7 @@ function Game() {
   }
 
 
+
   return (
     <div className='game-main'>
       <div className='game'>
@@ -286,9 +288,9 @@ function Game() {
             </button>
             <div className='game-chat-messages'>
               {chat.map((message, index) => (
-              <p key={index}>{message}</p>
+              <p className='game-message' key={index}>{message}</p>
             ))}
-        </div>
+            </div>
         </form>
       </div>
     </div>

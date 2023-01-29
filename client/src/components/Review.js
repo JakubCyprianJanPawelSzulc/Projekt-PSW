@@ -14,7 +14,7 @@ export default function Review(props) {
     const id = getCookie('id');
 
     useEffect(() => {
-        if (id == '63d52f11a349b4697bb1b6f6'){
+        if (id == '63d6d1493f376188ab277ed0'){
             setAdmin(true);
         }
     }, []);

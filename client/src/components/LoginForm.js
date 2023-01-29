@@ -36,6 +36,7 @@ export default function LoginForm() {
       .then((res) =>{
         if(res.status === 200){ 
             res.json().then(data=>{
+              console.log(data)
               if(data._id) {
                 handleCookie(data._id);
                 handleCookieName(data.username);

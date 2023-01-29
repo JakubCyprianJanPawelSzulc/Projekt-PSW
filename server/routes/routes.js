@@ -8,6 +8,9 @@ var util = require('util');
 var log_file = fs.createWriteStream(__dirname + '/debug.log', {flags : 'w'});
 var log_stdout = process.stdout;
 
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
+
 console.log = function(d) { //
   log_file.write(util.format(d) + '\n');
 //   log_stdout.write(util.format(d) + '\n');
@@ -16,38 +19,53 @@ console.log = function(d) { //
 
 routes.route("/register").post(function (req, res) {
     let db_connect = dbo.getDb("myDatabase");
-    let myobj = {
-        username: req.body.username,
-        password: req.body.password,
-        email: req.body.email,
-        wins: 0,
-        losses: 0,
-        games_played: 0,
-    };
-    db_connect.collection("users").insertOne(myobj, function (err, res) {
+    db_connect.collection("users").findOne({ username: req.body.username }, function (err, result) {
         if (err) throw err;
-        console.log(`user ${myobj.username} added`)
-    }
-    );
-    res.json({ message: "User added successfully" });
+        if (result) {
+            res.json({ message: "Username already exists" });
+        } else {
+            bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+                let myobj = {
+                    username: req.body.username,
+                    password: hash,
+                    email: req.body.email,
+                    wins: 0,
+                    losses: 0,
+                    games_played: 0,
+                };
+                db_connect.collection("users").insertOne(myobj, function (err, res) {
+                    if (err) throw err;
+                    console.log(`user ${myobj.username} added`)
+                });
+                res.json({ message: "User added successfully" });
+            });            
+        }
+    });
 });
-
 
 
 routes.route("/login").post(function (req, res) {
     let db_connect = dbo.getDb("myDatabase");
     let myobj = {
         username: req.body.username,
-        password: req.body.password,
     };
     db_connect.collection("users").findOne(myobj, function (err, result) {
         if (err) throw err;
-        res.json(result);
-        console.log(`user ${result._id} logged in`)
-    }
-    );
+        if (result) {
+            bcrypt.compare(req.body.password, result.password, function(err, isMatch) {
+                if (isMatch) {
+                    console.log(result)
+                    res.json(result);
+                    console.log(`user ${myobj.username} logged in`)
+                } else {
+                    res.json({ message: "Incorrect password" });
+                }
+            });
+        } else {
+            res.json({ message: "User not found" });
+        }
+    });
 });
-
 
 
 routes.route("/api/user/:id").get(function (req, res) {

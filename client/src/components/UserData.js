@@ -46,13 +46,15 @@ export default function UserData() {
                 <button>
                     <Link to="/MainPage">powrót</Link>
                 </button>
-                <div>nazwa: {user.username}</div>
-                <div>email: {user.email}</div>
-                <div>liczba rozegranych gier: {user.games_played}</div>
-                <div>wygrane: {user.wins}</div>
-                <div>przegrane: {user.losses}</div>
-                <DeleteUserData />
-                <EditUserData />
+                <div className='user-data-main'>
+                    <div>nazwa: {user.username}</div>
+                    <div>email: {user.email}</div>
+                    <div>liczba rozegranych gier: {user.games_played}</div>
+                    <div>wygrane: {user.wins}</div>
+                    <div>przegrane: {user.losses}</div>
+                    <DeleteUserData />
+                    <EditUserData />
+                </div>
             </div>
         );
     }

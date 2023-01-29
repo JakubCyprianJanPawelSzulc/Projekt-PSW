@@ -27,19 +27,24 @@ export default function MainPage() {
   return (
     <div className="main-page">
       <h1>Strona główna</h1>
-        <button>
-            <Link to="/UserData">dane użytkownika</Link>
+        <button className='main-page-button'>
+            <Link to="/UserData" className='link'>dane użytkownika</Link>
         </button>
-        <button onClick={playGame}>
-          <Link to="/Game">rozpocznij grę</Link>
+        <button className='main-page-button' onClick={playGame}>
+          <Link to="/Game" className='link'>rozpocznij grę</Link>
         </button>
-        <button>
-          <Link to="/Chat">chat</Link>
+        <div className="ads">
+          <img className="ad-left" src={`${process.env.PUBLIC_URL}/ads/ad1.jpg`} alt="powiększyć swojego ects" />
+          <img className="ad-right" src={`${process.env.PUBLIC_URL}/ads/ad1.jpg`} alt="powiększyć swojego ects" />
+        </div>
+        <button className='main-page-button'>
+          <Link to="/Chat" className='link'>chat</Link>
         </button>
-        <button>
-          <Link to="/Reviews">opinie</Link>
+        <button className='main-page-button'>
+          <Link to="/Reviews" className='link'>opinie</Link>
         </button>
         <SearchUser />
+        
     </div>
   );
 }

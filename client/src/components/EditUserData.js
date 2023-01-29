@@ -49,7 +49,7 @@ export default function EditUserData() {
 
   return (
     <div className="edit-user-data">
-      <form onSubmit={formik.handleSubmit}>
+      <form className="edit-user-data-forms" onSubmit={formik.handleSubmit}>
         <label>
           <input
             type="text"

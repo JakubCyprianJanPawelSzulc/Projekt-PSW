@@ -79,7 +79,7 @@ export default function Chat() {
           wyślij
         </button>
         {chat.map((message, index) => (
-          <div key={index}>{message}</div>
+          <div className="chat-message" key={index}>{message}</div>
         ))}
       </form>
     </div>

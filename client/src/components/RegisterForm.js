@@ -18,7 +18,11 @@ export default function RegisterForm() {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log('Użytkownik zarejestrowany', data);
+          if(data.message==='User added successfully') {
+            alert('Zarejestrowano');
+          } else if (data.message==='Username already exists') {
+            alert('Ta nazwa użytkownika jest już zajęta');
+          }
         })
         .catch((error) => {
           console.error('Error:', error);
