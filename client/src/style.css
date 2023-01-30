@@ -70,22 +70,33 @@ input, textarea{
 .normal-cards{
     display: flex;
     flex-direction: row;
+    background-color: cadetblue;
+    align-items: center;
+    margin-top:5px;
+    margin-bottom: 5px;
 }
 .war-cards{
     display: flex;
     flex-direction: row;
+    background-color: cadetblue;
+    margin-top:5px;
+    margin-bottom: 5px;
+
 }
 .p1-war-cards{
     display: flex;
     flex-direction: column;
+    background-color: cadetblue;
 }
 .p2-war-cards{
     display: flex;
     flex-direction: column;
+    background-color: cadetblue;
 }
 .card-img{
     width: 100px;
     height: 150px;
+    background-color: cadetblue;
 }
 .game-main{
     display:flex;
@@ -200,19 +211,20 @@ input, textarea{
 .game-chat-messages {
     height: 500px;
     overflow-y: scroll;
-    width:60%
-    /* background-color: cadetblue;
-    color: black; */
+    background-color: cadetblue;
 }
 .game-message{
-    background-color: cadetblue;
-    color: black;
+    /* background-color: cadetblue;
+    color: black; */
     height:auto;
     word-wrap: break-word;
     word-break: break-all;
     width:90%;
     border-radius: 10px;
     padding: 2px;
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+    background-color:whitesmoke;
+    color:black;
 }
 
 .game-chat-messages::-webkit-scrollbar {
@@ -234,4 +246,69 @@ input, textarea{
 .game-button-1, .game-button-2{
     background-color: green;
     color: black;
+}
+
+.game-chat, .game{
+    background-color: cadetblue;
+    margin-left: 10px;
+    border: 1px solid black;
+    border-radius: 10px;
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+    padding-left:10px;
+    padding-right:10px;
+    height: 100%;
+    width:40%;
+}
+
+
+.game-chat-input{
+    width:100%;
+    background-color: whitesmoke;
+}
+
+
+.game-result, .game-decks{
+    border-radius: 10px;
+    padding: 2px;
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+    background-color:whitesmoke;
+    color:black;
+    width: 100%;
+    margin-top:3px;
+    margin-bottom:3px;
+}
+
+.game-main{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+
+.game-chat-form{
+    background-color: cadetblue;
+}
+
+.game-decks-result-cards{
+    display: flex;
+    flex-direction: column;
+    /* justify-content: center; */
+    align-items: center;
+    background-color: cadetblue;
+    height: 90%;
+
+}
+.game-messages-submit-button{
+    background-color: green;
+    color:black;
+}
+.ignore{
+    background-color: red;
+    color:black;
+}
+.ready-button{
+    background-color: whitesmoke;
+    color:black;
 }

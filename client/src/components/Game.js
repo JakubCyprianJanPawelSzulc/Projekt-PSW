@@ -27,6 +27,7 @@ function Game() {
   const [gaveUp, setGaveUp] = useState(false)
 
   const[chat, setChat] = useState([])
+  const[showChat, setShowChat] = useState(true)
 
   const [playerId, setPlayerId] = useState(1);
   const [ready, setReady] = useState(false);
@@ -245,35 +246,49 @@ function Game() {
     setReady(true);
   }
 
+  const handleIgnore = () => {
+    setShowChat(false);
+  }
+  const handleShowChat = () => {
+    setShowChat(true);
+  }
+
 
 
   return (
     <div className='game-main'>
-      <div className='game'>
-        {gaveUp && 
-          <Link to='/MainPage'>
-            <button>wróć</button>
-          </Link>}
-        {!gaveUp && ready &&
-          <Link to='/MainPage'>
-            <button className="give-up-button" onClick={() => handleGiveUp(id)}>Poddaj się</button>
-          </Link>
-         }
+        <div className='game'>
+          {gaveUp && 
+            <Link to='/MainPage'>
+              <button>wróć</button>
+            </Link>}
+          {!gaveUp && ready &&
+            <Link to='/MainPage'>
+              <button className="give-up-button" onClick={() => handleGiveUp(id)}>Poddaj się</button>
+            </Link>
+          }
 
-        {!ready &&<button onClick={()=>handleReady()}>gotowy do gry</button>}
+          {!ready &&<button className='ready-button' onClick={()=>handleReady()}>gotowy do gry</button>}
 
-        { playerId === 1 && ready && <button className='game-button-1' onClick={handlePlayer1Move1}>Player 1 Move 1</button> }
-        { playerId === 1 && ready && <button className='game-button-2' onClick={handlePlayer1Move2}>Player 1 Move 2</button> }
-        { playerId === 2 && ready && <button className='game-button-1' onClick={handlePlayer2Move1}>Player 2 Move 1</button> }
-        { playerId === 2 && ready && <button className='game-button-2' onClick={handlePlayer2Move2}>Player 2 Move 2</button> }
-        <p>{decks}</p>
-        <p>{result}</p>
-        <p className='normal-cards'><NormalCardsP1 cardsPlayer1={cardsPlayer1} /> <NormalCardsP2 cardsPlayer2={cardsPlayer2}/></p>
-        {war && <p className='war-cards'><WarCardsP1 warCardsPlayer1={warCardsPlayer1} /> <WarCardsP2 warCardsPlayer2={warCardsPlayer2}/></p>}
+          { playerId === 1 && ready && <button className='game-button-1' onClick={handlePlayer1Move1}>Player 1 Move 1</button> }
+          { playerId === 1 && ready && <button className='game-button-2' onClick={handlePlayer1Move2}>Player 1 Move 2</button> }
+          { playerId === 2 && ready && <button className='game-button-1' onClick={handlePlayer2Move1}>Player 2 Move 1</button> }
+          { playerId === 2 && ready && <button className='game-button-2' onClick={handlePlayer2Move2}>Player 2 Move 2</button> }
+        <div className='game-decks-result-cards'>
+          <p className='game-decks'>{decks}</p>
+          <p className='game-result'>{result}</p>
+          <p className='normal-cards'><NormalCardsP1 cardsPlayer1={cardsPlayer1} /> <NormalCardsP2 cardsPlayer2={cardsPlayer2}/></p>
+          {war && <p className='war-cards'><WarCardsP1 warCardsPlayer1={warCardsPlayer1} /> <WarCardsP2 warCardsPlayer2={warCardsPlayer2}/></p>}
+        </div>
       </div>
-      <div className='game-chat'>
+      {showChat?(
+        <div className='game-chat'>
+        <button className='ignore' onClick={()=>handleIgnore()}>
+              ignore
+        </button>
         <form className='game-chat-form' onSubmit={formik.handleSubmit}>
           <input
+              className='game-chat-input'
               value={formik.values.message}
               name="message"
               placeholder="wiadomość"
@@ -292,7 +307,10 @@ function Game() {
             ))}
             </div>
         </form>
-      </div>
+      </div>)
+      :(
+        <button className='ignore' onClick={()=>handleShowChat()}>pokaż chat</button>
+      )}
     </div>
   );
 }

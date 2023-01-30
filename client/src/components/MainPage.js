@@ -57,7 +57,7 @@ export default function MainPage() {
   );
   else return(
     <div className="main-page">
-      <button>
+      <button className='main-page-button'>
         <Link to="/" className='link'>zaloguj się</Link>
       </button>
     </div>
