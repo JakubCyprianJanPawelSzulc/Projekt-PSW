@@ -256,16 +256,16 @@ function Game() {
           </Link>}
         {!gaveUp && ready &&
           <Link to='/MainPage'>
-            <button onClick={() => handleGiveUp(id)}>Poddaj się</button>
+            <button className="give-up-button" onClick={() => handleGiveUp(id)}>Poddaj się</button>
           </Link>
          }
 
         {!ready &&<button onClick={()=>handleReady()}>gotowy do gry</button>}
 
-        { playerId === 1 && ready && <button onClick={handlePlayer1Move1}>Player 1 Move 1</button> }
-        { playerId === 1 && ready && <button onClick={handlePlayer1Move2}>Player 1 Move 2</button> }
-        { playerId === 2 && ready && <button onClick={handlePlayer2Move1}>Player 2 Move 1</button> }
-        { playerId === 2 && ready && <button onClick={handlePlayer2Move2}>Player 2 Move 2</button> }
+        { playerId === 1 && ready && <button className='game-button-1' onClick={handlePlayer1Move1}>Player 1 Move 1</button> }
+        { playerId === 1 && ready && <button className='game-button-2' onClick={handlePlayer1Move2}>Player 1 Move 2</button> }
+        { playerId === 2 && ready && <button className='game-button-1' onClick={handlePlayer2Move1}>Player 2 Move 1</button> }
+        { playerId === 2 && ready && <button className='game-button-2' onClick={handlePlayer2Move2}>Player 2 Move 2</button> }
         <p>{decks}</p>
         <p>{result}</p>
         <p className='normal-cards'><NormalCardsP1 cardsPlayer1={cardsPlayer1} /> <NormalCardsP2 cardsPlayer2={cardsPlayer2}/></p>

@@ -33,6 +33,11 @@ export default function UserData() {
         }
     }, [id]);
 
+    const logout = () => {
+        document.cookie = "name=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = "id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    }
+
 
     if (error) {
         return <div>Error: {error.message}</div>;
@@ -47,6 +52,9 @@ export default function UserData() {
                     <Link to="/MainPage">powrót</Link>
                 </button>
                 <div className='user-data-main'>
+                    <button>
+                        <Link to="/" onClick={logout}>wyloguj</Link>
+                    </button>
                     <div>nazwa: {user.username}</div>
                     <div>email: {user.email}</div>
                     <div>liczba rozegranych gier: {user.games_played}</div>

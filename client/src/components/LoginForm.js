@@ -2,7 +2,6 @@ import { useFormik } from 'formik';
 import React, {useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCookies} from 'react-cookie';
-import { loginAction } from '../actions/loginActions.js';
 
 
 export default function LoginForm() {

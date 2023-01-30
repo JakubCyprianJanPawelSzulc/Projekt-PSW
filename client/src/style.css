@@ -225,3 +225,13 @@ input, textarea{
 .game-chat-messages::-webkit-scrollbar-thumb:hover {
     background-color: #555555;
 }
+
+.give-up-button{
+    background-color: red;
+    color: black;
+}
+
+.game-button-1, .game-button-2{
+    background-color: green;
+    color: black;
+}

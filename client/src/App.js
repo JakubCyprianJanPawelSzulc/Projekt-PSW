@@ -8,27 +8,12 @@ import MainPage from './components/MainPage.js';
 import UserData from './components/UserData.js';
 import Game from './components/Game.js';
 import Reviews from './components/Reviews.js';
-import { useCookies } from 'react-cookie';
 
 
 export default function App() {
-  const [user, setUser] = useState(null);
-  const [cookies, setCookies, removeCookies] = useCookies(['user']);
-  const navigate = useNavigate();
-
-  if (cookies.user !== undefined && user == null) {
-    setUser(cookies.user);
-  }
-
-  function logout(){
-    setUser(null);
-    removeCookies('user');
-    navigate("/login")
-  }
 
   return (
     <div>
-
         <Routes>
           <Route path="/" element={<LoginPage/>} />
           <Route path="RegisterPage" element={<RegisterForm/>} />

@@ -33,19 +33,20 @@ app.listen(port, () => {
 });
 
 app.post('/ready', (req, res) => {
-  client = mqtt.connect('ws://localhost:8083/mqtt')
+  
   gotowiGracze++;
   console.log(gotowiGracze)
   if (gotowiGracze == 2) {
+    client = mqtt.connect('ws://localhost:8083/mqtt')
     console.log('rozpoczynam grę')
     gameManager = new GameManager(client);
     gameManager.startGame();
-    gotowiGracze=0;
+    gotowiGracze = 0;
   }
 });
 
 app.post('/giveUp', (req, res) => {
-  gotowiGracze=0;
+  // gotowiGracze=0;
   console.log('koniec gry')
   client.publish('endGame', 'koniec gry')
   gameManager = null;
