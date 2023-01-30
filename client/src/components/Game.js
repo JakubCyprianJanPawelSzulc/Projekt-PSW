@@ -120,6 +120,7 @@ function Game() {
           setResult(message.toString());
         }
         if (topic === "/game/end"){
+          client.end
           setResult(message.toString());
           if(message.toString() === 'Gracz 1 wygrał grę'){
             if(playerId === 1){
@@ -155,13 +156,13 @@ function Game() {
           }
         }
         if (topic === "/game/giveUp"){
+          client.end
           setResult(message.toString());
           setGaveUp(true);
           console.log(message.toString())
           console.log(playerId)
           if(message.toString()==='player 1 się poddał'){
             if(playerId===2){
-              console.log('powinna się dodać wygrana')
               fetch(`http://localhost:5000/api/user/${id}/addwin`, {
                 method: 'PUT',
                 body: JSON.stringify({ ready: true }),
@@ -260,7 +261,7 @@ function Game() {
         <div className='game'>
           {gaveUp && 
             <Link to='/MainPage'>
-              <button>wróć</button>
+              <button>wyjście</button>
             </Link>}
           {!gaveUp && ready &&
             <Link to='/MainPage'>

@@ -20,7 +20,7 @@ export default function MainPage() {
         body: JSON.stringify({ ready: true }),
         headers: { 'Content-Type': 'application/json' },
     })
-    fetch(`http://localhost:5000/api/user/${id}/addgame`, {
+    fetch(`http://localhost:5000/api/user/${cookie}/addgame`, {
         method: 'PUT',
         body: JSON.stringify({ ready: true }),
         headers: { 'Content-Type': 'application/json' },

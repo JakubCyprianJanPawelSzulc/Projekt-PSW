@@ -33,7 +33,6 @@ app.listen(port, () => {
 });
 
 app.post('/ready', (req, res) => {
-  
   gotowiGracze++;
   console.log(gotowiGracze)
   if (gotowiGracze == 2) {
