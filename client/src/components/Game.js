@@ -47,6 +47,11 @@ function Game() {
   }
   const id = getCookie('id');
 
+  // function connect(){
+  //   let client=mqtt.connect('ws://localhost:8083/mqtt')
+  //   return (client)
+  // }
+
   useEffect(()=>{
     const client=mqtt.connect('ws://localhost:8083/mqtt')
     client.on("connect", () => {
@@ -86,12 +91,10 @@ function Game() {
         }
         if (topic === "/game/round/player1/card") {
           setCardsPlayer1(message.toString());
-          console.log('round p1 '+message.toString())
         }
 
         if (topic === "/game/round/player2/card") {
           setCardsPlayer2(message.toString());
-          console.log('round p2 '+message.toString())
         }
         if (topic === "/game/war/start") {
           setWar(true);
@@ -99,12 +102,10 @@ function Game() {
         }
         if (topic === "/game/war/player1/card") {
           setWarCardsPlayer1(message.toString());
-          console.log('war p1 '+message.toString())
         }
 
         if (topic === "/game/war/player2/card") {
           setWarCardsPlayer2(message.toString());
-          console.log('war p2 '+message.toString())
         }
         
         if (topic === "/game/decks") {
@@ -159,8 +160,6 @@ function Game() {
           client.end
           setResult(message.toString());
           setGaveUp(true);
-          console.log(message.toString())
-          console.log(playerId)
           if(message.toString()==='player 1 się poddał'){
             if(playerId===2){
               fetch(`http://localhost:5000/api/user/${id}/addwin`, {
@@ -172,7 +171,6 @@ function Game() {
           }
           if(message.toString()==='player 2 się poddał'){
             if(playerId===1){
-              console.log('powinna się dodać wygrana')
               fetch(`http://localhost:5000/api/user/${id}/addwin`, {
                 method: 'PUT',
                 body: JSON.stringify({ ready: true }),
@@ -191,7 +189,7 @@ function Game() {
       client.end();
       setClient(null)
     }
-  }, [isConnected, isSubscribed]) 
+  }, [isConnected, isSubscribed, playerId]) 
 
 
   const formik = useFormik({
@@ -278,8 +276,8 @@ function Game() {
         <div className='game-decks-result-cards'>
           <p className='game-decks'>{decks}</p>
           <p className='game-result'>{result}</p>
-          <p className='normal-cards'><NormalCardsP1 cardsPlayer1={cardsPlayer1} /> <NormalCardsP2 cardsPlayer2={cardsPlayer2}/></p>
-          {war && <p className='war-cards'><WarCardsP1 warCardsPlayer1={warCardsPlayer1} /> <WarCardsP2 warCardsPlayer2={warCardsPlayer2}/></p>}
+          <div className='normal-cards'><NormalCardsP1 cardsPlayer1={cardsPlayer1} /> <NormalCardsP2 cardsPlayer2={cardsPlayer2}/></div>
+          {war && <div className='war-cards'><WarCardsP1 warCardsPlayer1={warCardsPlayer1} /> <WarCardsP2 warCardsPlayer2={warCardsPlayer2}/></div>}
         </div>
       </div>
       {showChat?(
