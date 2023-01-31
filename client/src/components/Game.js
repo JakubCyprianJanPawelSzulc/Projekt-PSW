@@ -32,6 +32,8 @@ function Game() {
   const [playerId, setPlayerId] = useState(1);
   const [ready, setReady] = useState(false);
 
+  const [endGame, setEndGame] = useState(false);
+
 
   function getCookie(name) {
     var value = "; " + document.cookie;
@@ -121,6 +123,7 @@ function Game() {
           setResult(message.toString());
         }
         if (topic === "/game/end"){
+          setEndGame(true);
           client.end
           setResult(message.toString());
           if(message.toString() === 'Gracz 1 wygrał grę'){
@@ -257,11 +260,11 @@ function Game() {
   return (
     <div className='game-main'>
         <div className='game'>
-          {gaveUp && 
+          {(gaveUp || endGame )&&
             <Link to='/MainPage'>
               <button>wyjście</button>
             </Link>}
-          {!gaveUp && ready &&
+          {!gaveUp && ready && !endGame &&
             <Link to='/MainPage'>
               <button className="give-up-button" onClick={() => handleGiveUp(id)}>Poddaj się</button>
             </Link>
