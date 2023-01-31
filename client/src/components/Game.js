@@ -34,6 +34,8 @@ function Game() {
 
   const [endGame, setEndGame] = useState(false);
 
+  const [havePartner, setHavePartner] = useState(false);
+
 
   function getCookie(name) {
     var value = "; " + document.cookie;
@@ -79,15 +81,33 @@ function Game() {
 
       client.subscribe("/game/ready")
 
+      client.subscribe("/game/spectator")
+
       setIsSubscribed(true);
     }
     if (isSubscribed){
       client.on("message", (topic, message) => {
         if (topic === "/game/ready"){
           const data=JSON.parse(message)
+          if(!havePartner){
+            if(data.userId!==id){
+              setHavePartner(true)
+              if (data.playerId === 1){
+                setPlayerId(2)
+              }
+            }
+          }
+          else if(havePartner){
+            console.log('partner: '+havePartner)
+            client.publish('/game/spectator', JSON.stringify({userId: id, name: name}))
+          }
+        }
+        if (topic === "/game/spectator"){
+          const data=JSON.parse(message)
           if(data.userId!==id){
-            if (data.playerId === 1){
-              setPlayerId(2)
+            if(!havePartner){
+              setHavePartner(true)
+              setPlayerId(0)
             }
           }
         }
@@ -123,8 +143,13 @@ function Game() {
           setResult(message.toString());
         }
         if (topic === "/game/end"){
+          fetch (`http://localhost:5000/endGame`, {
+            method: 'POST',
+            body: JSON.stringify({ ready: true }),
+            headers: { 'Content-Type': 'application/json' },
+          })
           setEndGame(true);
-          client.end
+          
           setResult(message.toString());
           if(message.toString() === 'Gracz 1 wygrał grę'){
             if(playerId === 1){
@@ -160,7 +185,7 @@ function Game() {
           }
         }
         if (topic === "/game/giveUp"){
-          client.end
+          
           setResult(message.toString());
           setGaveUp(true);
           if(message.toString()==='player 1 się poddał'){
@@ -192,7 +217,7 @@ function Game() {
       client.end();
       setClient(null)
     }
-  }, [isConnected, isSubscribed, playerId]) 
+  }, [isConnected, isSubscribed, playerId, havePartner]) 
 
 
   const formik = useFormik({
@@ -224,15 +249,15 @@ function Game() {
 
   const handleGiveUp = (id) => {
     fetch('http://localhost:5000/giveUp', {
-        method: 'POST',
-        body: JSON.stringify({ ready: true }),
-        headers: { 'Content-Type': 'application/json' },
-      })
+      method: 'POST',
+      body: JSON.stringify({ ready: true }),
+      headers: { 'Content-Type': 'application/json' },
+    })
     fetch(`http://localhost:5000/api/user/${id}/giveUp`, {
-        method: 'PUT',
-        body: JSON.stringify({ ready: true }),
-        headers: { 'Content-Type': 'application/json' },
-        })
+      method: 'PUT',
+      body: JSON.stringify({ ready: true }),
+      headers: { 'Content-Type': 'application/json' },
+    })
 
     if(playerId === 1){
       client.publish('/game/giveUp', 'player 1 się poddał');
@@ -240,7 +265,7 @@ function Game() {
     if(playerId === 2){
       client.publish('/game/giveUp', 'player 2 się poddał');
     }
-
+    client.end();
   }
 
   const handleReady = () => {
@@ -257,14 +282,19 @@ function Game() {
 
 
 
+
   return (
     <div className='game-main'>
         <div className='game'>
-          {(gaveUp || endGame )&&
+          { playerId===0 &&
             <Link to='/MainPage'>
-              <button>wyjście</button>
+              <button onClick={() => client.end()}>wyjście</button>
             </Link>}
-          {!gaveUp && ready && !endGame &&
+          {((gaveUp && playerId!==0) || (endGame && playerId!==0)) &&
+            <Link to='/MainPage'>
+              <button onClick={() => client.end()}>wyjście</button>
+            </Link>}
+          {!gaveUp && ready && !endGame && playerId!==0 &&
             <Link to='/MainPage'>
               <button className="give-up-button" onClick={() => handleGiveUp(id)}>Poddaj się</button>
             </Link>

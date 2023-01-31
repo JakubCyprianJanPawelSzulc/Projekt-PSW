@@ -22,18 +22,42 @@ class Deck {
       [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
     }
   }
-  drawCard() {
-    if(this.cards.length === 0) {
-      const drawnCard = null;
-      this.mqttClient.publish('/game/noCards', JSON.stringify({ playerId: this.playerId }));
-      return drawnCard;
+  drawCard(type) {
+    if(type==='war1'){
+      if(this.cards.length === 1) {
+        const drawnCard = null;
+        this.mqttClient.publish('/game/noCards', JSON.stringify({ playerId: this.playerId }));
+        return drawnCard;
+      }
+      else{
+        const drawnCard = this.cards.shift();
+        this.mqttClient.publish('/game/cardDrawn', JSON.stringify({ value: drawnCard.value, suit: drawnCard.suit }));
+        return drawnCard;
+      }
     }
-    else{
-      //to opcjonalnie może być
-      // this.shuffle();
-      const drawnCard = this.cards.shift();
-      this.mqttClient.publish('/game/cardDrawn', JSON.stringify({ value: drawnCard.value, suit: drawnCard.suit }));
-      return drawnCard;
+    if(type==='war2'){
+      if(this.cards.length === 0) {
+        const drawnCard = null;
+        this.mqttClient.publish('/game/noCards', JSON.stringify({ playerId: this.playerId }));
+        return drawnCard;
+      }
+      else{
+        const drawnCard = this.cards.shift();
+        this.mqttClient.publish('/game/cardDrawn', JSON.stringify({ value: drawnCard.value, suit: drawnCard.suit }));
+        return drawnCard;
+      }
+    }
+    if(type==='normal'){
+      if(this.cards.length === 0) {
+        const drawnCard = null;
+        this.mqttClient.publish('/game/noCards', JSON.stringify({ playerId: this.playerId }));
+        return drawnCard;
+      }
+      else{
+        const drawnCard = this.cards.shift();
+        this.mqttClient.publish('/game/cardDrawn', JSON.stringify({ value: drawnCard.value, suit: drawnCard.suit }));
+        return drawnCard;
+      }
     }
 }
   addCard(card) {
@@ -52,6 +76,7 @@ class GameManager {
   }
 
   endGame(){
+
     this.game=false;
     this.mqttClient.publish('/game/end', 'Koniec gry');
   }
@@ -60,6 +85,14 @@ class GameManager {
     const [player1Deck, player2Deck] = this.masterDeck.dealCards();
     this.player1Deck = player1Deck;
     this.player2Deck = player2Deck;
+    this.mqttClient.subscribe('/game/giveUp', (err, granted) => {
+      this.mqttClient.on('message', (topic, message) => {
+        if (topic === '/game/giveUp') {
+          this.game=false;
+        }
+      })
+    })
+
     this.mqttClient.subscribe('/game/noCards', (err, granted) => {
       if (!err) {
         this.mqttClient.on('message', (topic, message) => {
@@ -133,8 +166,8 @@ class GameManager {
     });
 
     await Promise.all([player1MovePromise, player2MovePromise]);
-    const player1Card = this.player1Deck.drawCard();
-    const player2Card = this.player2Deck.drawCard();
+    const player1Card = this.player1Deck.drawCard('normal');
+    const player2Card = this.player2Deck.drawCard('normal');
     this.mqttClient.publish('/game/round/player1/card', player1Card.value + ' ' + player1Card.suit);
     this.mqttClient.publish('/game/round/player2/card', player2Card.value + ' ' + player2Card.suit);
     // console.log('p1: '+this.player1Deck.cards.length, 'p2: '+this.player2Deck.cards.length)
@@ -221,10 +254,10 @@ class War {
         });
       });
     await Promise.all([player1Move1Promise, player2Move1Promise, player1Move2Promise, player2Move2Promise]);
-    const player1Card1 = this.player1Deck.drawCard();
-    const player2Card1 = this.player2Deck.drawCard();
-    const player1Card2 = this.player1Deck.drawCard();
-    const player2Card2 = this.player2Deck.drawCard();
+    const player1Card1 = this.player1Deck.drawCard('war1');
+    const player2Card1 = this.player2Deck.drawCard('war1');
+    const player1Card2 = this.player1Deck.drawCard('war2');
+    const player2Card2 = this.player2Deck.drawCard('war2');
 
     console.log('cards drawn')
     this.player1WarCards.push(player1Card1);
@@ -297,10 +330,10 @@ class War {
       });
     });
     await Promise.all([player1Move3Promise, player2Move3Promise, player1Move4Promise, player2Move4Promise]);
-    const player1Card3 = this.player1Deck.drawCard();
-    const player2Card3 = this.player2Deck.drawCard();
-    const player1Card4 = this.player1Deck.drawCard();
-    const player2Card4 = this.player2Deck.drawCard();
+    const player1Card3 = this.player1Deck.drawCard('war1');
+    const player2Card3 = this.player2Deck.drawCard('war1');
+    const player1Card4 = this.player1Deck.drawCard('war2');
+    const player2Card4 = this.player2Deck.drawCard('war2');
 
     this.player1WarCards.push(player1Card3);
     this.player2WarCards.push(player2Card3);
