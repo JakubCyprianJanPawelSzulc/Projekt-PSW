@@ -84,20 +84,27 @@ routes.route("/api/user/:id").get(function (req, res) {
 routes.route("/api/user/:id").put(function (req, res) {
     let db_connect = dbo.getDb("myDatabase");
     let myquery = { _id: ObjectId(req.params.id) };
-    let newvalues = {
-        $set: {
-            username: req.body.username,
-            password: req.body.password,
-            email: req.body.email,
+    db_connect.collection("users").findOne({ username: req.body.username }, function (err, result) {
+        if (err) throw err;
+        if (result) {
+            res.json({ message: "Username already exists" });
+        } else {
+            bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+                let newvalues = {
+                    $set: {
+                    username: req.body.username,
+                    password: hash,
+                    email: req.body.email,
+                    }
+                };
+                db_connect.collection("users").updateOne(myquery, newvalues, function (err, result) {
+                    if (err) throw err;
+                    res.json(result);
+                    console.log(`user ${req.params.id} updated`)
+                });
+            });            
         }
-    };
-    db_connect.collection("users").updateOne
-        (myquery, newvalues, function (err, result) {
-            if (err) throw err;
-            res.json(result);
-            console.log(`user ${req.params.id} updated`)
-        }
-        );
+    });
 });
 
 
