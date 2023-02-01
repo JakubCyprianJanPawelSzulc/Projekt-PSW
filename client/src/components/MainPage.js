@@ -15,6 +15,7 @@ export default function MainPage() {
   }, []);
 
   const playGame = () => {
+    localStorage.clear();
     fetch('http://localhost:5000/ready', {
         method: 'POST',
         body: JSON.stringify({ ready: true }),

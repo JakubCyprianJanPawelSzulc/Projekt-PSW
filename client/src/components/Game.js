@@ -57,6 +57,7 @@ function Game() {
   // }
 
   useEffect(()=>{
+    console.log('łączę się z brokerem')
     const client=mqtt.connect('ws://localhost:8083/mqtt')
     client.on("connect", () => {
       setIsConnected(true);
@@ -65,17 +66,17 @@ function Game() {
     if (isConnected) {
       client.subscribe("/game/round/result");
       client.subscribe("/game/war/result");
-      client.subscribe("/game/war/start")
+      client.subscribe("/game/war/start");
       client.subscribe("/game/end");
 
-      client.subscribe("/game/round/player1/card")
-      client.subscribe("/game/round/player2/card")
-      client.subscribe("/game/war/player1/card")
-      client.subscribe("/game/war/player2/card")
+      client.subscribe("/game/round/player1/card");
+      client.subscribe("/game/round/player2/card");
+      client.subscribe("/game/war/player1/card");
+      client.subscribe("/game/war/player2/card");
 
-      client.subscribe("/game/decks")
+      client.subscribe("/game/decks");
 
-      client.subscribe("/game/giveUp")
+      client.subscribe("/game/giveUp");
 
       client.subscribe("/game/chat")
 
@@ -265,6 +266,21 @@ function Game() {
     if(playerId === 2){
       client.publish('/game/giveUp', 'player 2 się poddał');
     }
+
+    client.unsubscribe("/game/round/result");
+    client.unsubscribe("/game/war/result");
+    client.unsubscribe("/game/war/start");
+    client.unsubscribe("/game/end");
+    client.unsubscribe("/game/round/player1/card");
+    client.unsubscribe("/game/round/player2/card");
+    client.unsubscribe("/game/war/player1/card");
+    client.unsubscribe("/game/war/player2/card");
+    client.unsubscribe("/game/decks");
+    client.unsubscribe("/game/giveUp");
+    client.unsubscribe("/game/chat");
+    client.unsubscribe("/game/ready");
+    client.unsubscribe("/game/spectator");
+
     client.end();
   }
 
@@ -280,6 +296,25 @@ function Game() {
     setShowChat(true);
   }
 
+  const handleExit = () => {
+    client.unsubscribe("/game/round/result");
+    client.unsubscribe("/game/war/result");
+    client.unsubscribe("/game/war/start");
+    client.unsubscribe("/game/end");
+    client.unsubscribe("/game/round/player1/card");
+    client.unsubscribe("/game/round/player2/card");
+    client.unsubscribe("/game/war/player1/card");
+    client.unsubscribe("/game/war/player2/card");
+    client.unsubscribe("/game/decks");
+    client.unsubscribe("/game/giveUp");
+    client.unsubscribe("/game/chat");
+    client.unsubscribe("/game/ready");
+    client.unsubscribe("/game/spectator");
+
+    client.end();
+    localStorage.clear()
+  }
+
 
 
 
@@ -288,11 +323,11 @@ function Game() {
         <div className='game'>
           { playerId===0 &&
             <Link to='/MainPage'>
-              <button onClick={() => client.end()}>wyjście</button>
+              <button onClick={() => handleExit()}>wyjście</button>
             </Link>}
           {((gaveUp && playerId!==0) || (endGame && playerId!==0)) &&
             <Link to='/MainPage'>
-              <button onClick={() => client.end()}>wyjście</button>
+              <button onClick={() => handleExit()}>wyjście</button>
             </Link>}
           {!gaveUp && ready && !endGame && playerId!==0 &&
             <Link to='/MainPage'>
